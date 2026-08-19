@@ -292,6 +292,17 @@ export default function Page() {
         </div>
       </section>
 
+      <div className="band">
+        <div className="img" />
+        <div className="scrim" />
+        <div className="cap">
+          <div className="fn">fail closed</div>
+          <div className="q">
+            Closed at the <em>moment of action.</em>
+          </div>
+        </div>
+      </div>
+
       <footer>
         <div className="wrap foot-in">
           <div className="foot-brand">

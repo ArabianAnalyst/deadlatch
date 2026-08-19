@@ -894,6 +894,61 @@ section {
   font-weight: 500;
 }
 
+/* BAND */
+.band {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  background: var(--ground);
+}
+.band .img {
+  position: absolute;
+  inset: 0;
+  background: url("/latch-band.jpg") center center / cover no-repeat;
+}
+.band .scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(10, 12, 16, 0) 48%, rgba(10, 12, 16, 0.5) 100%),
+    linear-gradient(180deg, rgba(10, 12, 16, 0.45), transparent 30%, transparent 70%, rgba(10, 12, 16, 0.5));
+}
+.band .cap {
+  position: relative;
+  z-index: 1;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  text-align: right;
+}
+.band .cap .fn {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.band .cap .q {
+  font-family: var(--sans);
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+  color: var(--ink);
+  text-wrap: balance;
+  max-width: 22ch;
+}
+.band .cap .q em {
+  font-style: normal;
+  color: var(--allow);
+}
+
 /* FOOTER */
 footer {
   border-top: 1px solid var(--line);
