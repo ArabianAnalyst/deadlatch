@@ -7,7 +7,7 @@
   --line2: #2e3742;
   --ink: #e8edf3;
   --muted: #8a94a2;
-  --faint: #59626f;
+  --faint: #7c8798; /* 4.6:1 on --ground. was #59626f at 3.17:1, failed AA at 12-13px */
   --allow: #37d07e;
   --allow-bg: rgba(55, 208, 126, 0.12);
   --allow-ln: rgba(55, 208, 126, 0.35);
@@ -148,7 +148,10 @@ nav {
 
 /* HERO */
 .hero {
-  padding: 64px 0 44px;
+  /* padding-block, never the shorthand. The shorthand's horizontal value
+     overrides .wrap's `padding: 0 24px` and the hero then runs flush to
+     both viewport edges on a phone. It shipped that way. */
+  padding-block: 64px 44px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.14fr);
   gap: 52px;

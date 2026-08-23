@@ -95,14 +95,34 @@ export default function Console() {
     }
   }, []);
 
+  // One lap of STREAM spends $53.20 of the $200 daily cap and takes about
+  // sixteen seconds, so without this the console saturates its own cap in
+  // roughly a minute and then denies everything forever. Anyone watching for
+  // more than a minute saw a product that blocks every payment, which is the
+  // opposite of the argument. The day ends with the lap and a fresh one starts.
+  //
+  // The chain resets with it rather than being trimmed. verifyChain() requires
+  // chain[0].prev === GENESIS, so slicing the array to bound memory would make
+  // the tamper indicator report a break that had not happened.
+  const resetDay = useCallback(() => {
+    spentRef.current = 0;
+    setSpent(0);
+    caughtRef.current = [];
+    setCaught([]);
+    chainRef.current = [];
+    setChain([]);
+    setBrokenFrom(null);
+  }, []);
+
   const start = useCallback(() => {
     setRunning(true);
     if (timer.current) return;
     timer.current = setInterval(() => {
+      if (idxRef.current > 0 && idxRef.current % STREAM.length === 0) resetDay();
       void fire(STREAM[idxRef.current % STREAM.length]!);
       idxRef.current += 1;
     }, 2300);
-  }, [fire]);
+  }, [fire, resetDay]);
 
   useEffect(() => {
     reduced.current =
