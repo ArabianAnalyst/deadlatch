@@ -41,12 +41,8 @@ body {
   -webkit-font-smoothing: antialiased;
   background-image: radial-gradient(1200px 620px at 82% -12%, rgba(55, 208, 126, 0.06), transparent 60%),
     radial-gradient(1100px 720px at 4% 114%, rgba(55, 208, 126, 0.035), transparent 62%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 20%),
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: auto, auto, auto, 46px 46px, 46px 46px;
-  background-position: 0 0, 0 0, 0 0, -1px -1px, -1px -1px;
-  background-attachment: fixed, fixed, fixed, scroll, scroll;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 20%);
+  background-attachment: fixed;
 }
 body::before {
   content: "";
