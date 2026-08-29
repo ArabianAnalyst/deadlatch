@@ -197,6 +197,68 @@ export default function Page() {
         </div>
       </section>
 
+      <section id="now" className="wrap now">
+        <div className="sec-head">
+          <div className="eyebrow">Why now</div>
+          <h2>The rest of the field is arriving at the same three controls.</h2>
+          <p>
+            This is not our claim. Independent security guidance, a US Senate draft, and this year&apos;s incident
+            data all point at one loop. Enforce what an agent can do, prove what it did, watch for what slipped
+            through. The sources are named so you can check them.
+          </p>
+        </div>
+
+        <div className="now-grid">
+          <a
+            className="signal enforce"
+            href="https://www.sans.org/blog/your-ai-agent-easily-confused-deputy-why-cloud-security-needs-credential-broker"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="src">SANS · practitioner ↗</span>
+            <p>&quot;Your AI agent is an easily confused deputy. Cloud security needs a credential broker.&quot;</p>
+            <span className="maps">
+              <b>enforce</b> · a credential broker is Purse
+            </span>
+          </a>
+
+          <div className="signal prove">
+            <span className="src">AI AGENT Act · US Senate draft</span>
+            <p>Calls for scope-limited delegation credentials, real-time revocation, and auditable records.</p>
+            <span className="maps">
+              <b>enforce + prove</b> · grants, revocation, receipts
+            </span>
+          </div>
+
+          <a
+            className="signal enforce"
+            href="https://www.thefai.org/posts/human-anchored-intent-bound-delegation-for-ai-agents"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="src">HAID framework ↗</span>
+            <p>Proposes binding an agent&apos;s permissions to human-declared intent, not a coarse scope.</p>
+            <span className="maps">
+              <b>intent-binding</b> · Purse binds the exact action
+            </span>
+          </a>
+
+          <div className="signal watch">
+            <span className="src">CSA + vendor reporting · 2026</span>
+            <p>A majority of organizations running AI agents reported an agent-caused security incident this year.</p>
+            <span className="maps">
+              <b>why now</b> · the failures are already happening
+            </span>
+          </div>
+        </div>
+
+        <p className="now-note">
+          Honest about the receipts. The AI AGENT Act is a discussion draft, not law, and the incident figures are
+          vendor-reported. We link and name them so you can weigh them yourself, the same standard the audit chain
+          below holds itself to.
+        </p>
+      </section>
+
       <section id="audit" className="wrap audit">
         <div className="sec-head">
           <div className="eyebrow">Evidence you can hand an auditor</div>

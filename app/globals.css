@@ -750,6 +750,99 @@ section {
   font-size: 0.92rem;
 }
 
+/* WHY NOW — field convergence. depth borrowed (layered ground + soft
+   accent glows), rendered in Deadlatch's own near-black + green palette. */
+.now {
+  position: relative;
+}
+.now::before {
+  content: "";
+  position: absolute;
+  inset: 0 -24px;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(720px 300px at 12% 6%, rgba(55, 208, 126, 0.07), transparent 60%),
+    radial-gradient(640px 320px at 92% 22%, rgba(242, 179, 61, 0.05), transparent 58%);
+  border-radius: 20px;
+}
+.now > * {
+  position: relative;
+  z-index: 1;
+}
+.now .sec-head h2 {
+  letter-spacing: -0.028em;
+}
+.now-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 34px;
+}
+.signal {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: 0.16s border-color, 0.16s transform;
+}
+.signal.enforce {
+  box-shadow: inset 3px 0 0 var(--allow-ln), 0 22px 46px -32px rgba(0, 0, 0, 0.75);
+}
+.signal.prove {
+  box-shadow: inset 3px 0 0 var(--hold-ln), 0 22px 46px -32px rgba(0, 0, 0, 0.75);
+}
+.signal.watch {
+  box-shadow: inset 3px 0 0 var(--deny-ln), 0 22px 46px -32px rgba(0, 0, 0, 0.75);
+}
+a.signal:hover {
+  border-color: #3b4552;
+  transform: translateY(-2px);
+}
+.signal .src {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.signal p {
+  color: var(--ink);
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
+  line-height: 1.42;
+}
+.signal .maps {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: auto;
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
+}
+.signal .maps b {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.signal.enforce .maps b {
+  color: var(--allow);
+}
+.signal.prove .maps b {
+  color: var(--hold);
+}
+.signal.watch .maps b {
+  color: var(--deny);
+}
+.now-note {
+  margin-top: 22px;
+  font-size: 0.92rem;
+  color: var(--muted);
+  max-width: 74ch;
+}
+
 /* AUDIT */
 .audit .map {
   margin-top: 34px;
@@ -1016,6 +1109,9 @@ footer {
     grid-template-columns: 1fr;
   }
   .start .steps {
+    grid-template-columns: 1fr;
+  }
+  .now-grid {
     grid-template-columns: 1fr;
   }
 }
