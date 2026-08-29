@@ -39,11 +39,14 @@ body {
   line-height: 1.6;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
-  background-image: radial-gradient(1200px 600px at 80% -10%, rgba(55, 208, 126, 0.05), transparent 60%),
+  background-image: radial-gradient(1200px 620px at 82% -12%, rgba(55, 208, 126, 0.06), transparent 60%),
+    radial-gradient(1100px 720px at 4% 114%, rgba(55, 208, 126, 0.035), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 20%),
     linear-gradient(var(--line) 1px, transparent 1px),
     linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: auto, 46px 46px, 46px 46px;
-  background-position: 0 0, -1px -1px, -1px -1px;
+  background-size: auto, auto, auto, 46px 46px, 46px 46px;
+  background-position: 0 0, 0 0, 0 0, -1px -1px, -1px -1px;
+  background-attachment: fixed, fixed, fixed, scroll, scroll;
 }
 body::before {
   content: "";
@@ -156,6 +159,22 @@ nav {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.14fr);
   gap: 52px;
   align-items: start;
+  position: relative;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30px;
+  height: 400px;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(660px 300px at 22% 34%, rgba(55, 208, 126, 0.08), transparent 62%);
+}
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 .hero h1 {
   font-size: clamp(2.15rem, 4.4vw, 3.35rem);
@@ -632,10 +651,17 @@ section {
 .card {
   border: 1px solid var(--line);
   border-radius: 13px;
-  background: var(--panel);
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  box-shadow: 0 24px 50px -34px rgba(0, 0, 0, 0.72), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
   padding: 20px;
   display: flex;
   flex-direction: column;
+  transition: 0.16s border-color, 0.16s transform, 0.16s box-shadow;
+}
+a.card:hover {
+  border-color: #3b4552;
+  transform: translateY(-2px);
+  box-shadow: 0 30px 56px -32px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 }
 .card .tag {
   font-family: var(--mono);
@@ -758,12 +784,45 @@ section {
 .now::before {
   content: "";
   position: absolute;
-  inset: 0 -24px;
+  inset: 0;
   z-index: 0;
   pointer-events: none;
   background: radial-gradient(720px 300px at 12% 6%, rgba(55, 208, 126, 0.07), transparent 60%),
     radial-gradient(640px 320px at 92% 22%, rgba(242, 179, 61, 0.05), transparent 58%);
   border-radius: 20px;
+}
+
+/* PAGE DEPTH — each major section sits in its own soft pool of light,
+   anchored to a different corner so the page reads as lit, not tiled. */
+#stack,
+#audit,
+#start {
+  position: relative;
+}
+#stack::before,
+#audit::before,
+#start::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 20px;
+}
+#stack::before {
+  background: radial-gradient(660px 300px at 88% 6%, rgba(55, 208, 126, 0.05), transparent 60%);
+}
+#audit::before {
+  background: radial-gradient(660px 320px at 8% 10%, rgba(242, 179, 61, 0.045), transparent 60%);
+}
+#start::before {
+  background: radial-gradient(760px 340px at 50% 104%, rgba(55, 208, 126, 0.06), transparent 62%);
+}
+#stack > *,
+#audit > *,
+#start > * {
+  position: relative;
+  z-index: 1;
 }
 .now > * {
   position: relative;
@@ -848,7 +907,8 @@ a.signal:hover {
   margin-top: 34px;
   border: 1px solid var(--line);
   border-radius: 13px;
-  background: var(--panel);
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  box-shadow: 0 26px 54px -34px rgba(0, 0, 0, 0.72), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
   overflow: hidden;
 }
 .audit .row {
@@ -939,7 +999,8 @@ a.signal:hover {
 .inst {
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: var(--panel);
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  box-shadow: 0 22px 46px -34px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
   padding: 16px 18px;
 }
 .inst .nm {
