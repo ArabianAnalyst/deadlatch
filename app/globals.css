@@ -772,6 +772,97 @@ a.card:hover {
   font-size: 0.92rem;
 }
 
+/* FLOW GRAPH (React Flow) — themed to the Control-Console palette */
+.rf-wrap {
+  height: 440px;
+  margin-top: 34px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  box-shadow: 0 26px 54px -34px rgba(0, 0, 0, 0.72), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+.rf-wrap .react-flow {
+  background: transparent;
+}
+.rf-wrap .react-flow__attribution {
+  background: transparent;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+.rf-wrap .react-flow__attribution a {
+  color: var(--faint);
+}
+.rf-node {
+  min-width: 186px;
+  border: 1px solid var(--line2);
+  border-radius: 11px;
+  background: var(--panel3);
+  padding: 13px 15px;
+  font-family: var(--sans);
+  box-shadow: 0 12px 26px -18px rgba(0, 0, 0, 0.85);
+  transition: 0.16s border-color, 0.16s transform;
+}
+.rf-node:hover {
+  border-color: #3b4552;
+  transform: translateY(-2px);
+}
+.rf-node .rf-tag {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  color: var(--faint);
+}
+.rf-node.enforce .rf-tag {
+  color: var(--allow);
+}
+.rf-node.prove .rf-tag {
+  color: var(--hold);
+}
+.rf-node.watch .rf-tag {
+  color: var(--deny);
+}
+.rf-node.enforce {
+  box-shadow: inset 3px 0 0 var(--allow-ln), 0 12px 26px -18px rgba(0, 0, 0, 0.85);
+}
+.rf-node.prove {
+  box-shadow: inset 3px 0 0 var(--hold-ln), 0 12px 26px -18px rgba(0, 0, 0, 0.85);
+}
+.rf-node.watch {
+  box-shadow: inset 3px 0 0 var(--deny-ln), 0 12px 26px -18px rgba(0, 0, 0, 0.85);
+}
+.rf-node .rf-name {
+  font-family: var(--mono);
+  font-size: 0.98rem;
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.rf-node .rf-sub {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 3px;
+}
+.rf-node .react-flow__handle {
+  opacity: 0;
+  border: none;
+  min-width: 1px;
+  min-height: 1px;
+}
+.rf-wrap .react-flow__edge-text {
+  fill: var(--faint);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+.rf-wrap .react-flow__edge-textbg {
+  fill: var(--ground);
+}
+
 /* WHY NOW — field convergence. depth borrowed (layered ground + soft
    accent glows), rendered in Deadlatch's own near-black + green palette. */
 .now {

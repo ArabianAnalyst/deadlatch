@@ -1,4 +1,5 @@
 import Console from "@/components/Console";
+import FlowGraph from "@/components/FlowGraph";
 
 const REPO = {
   purse: "https://github.com/ArabianAnalyst/purse",
@@ -155,6 +156,18 @@ export default function Page() {
             </div>
           </a>
         </div>
+      </section>
+
+      <section id="flow" className="wrap">
+        <div className="sec-head">
+          <div className="eyebrow">The control loop</div>
+          <h2>One action, routed through all three.</h2>
+          <p>
+            The same action an agent takes, moving through enforce, prove, and watch. Purse decides it,
+            blackbox records it, Tripwire watches the outcome.
+          </p>
+        </div>
+        <FlowGraph />
       </section>
 
       <section id="why" className="wrap">
