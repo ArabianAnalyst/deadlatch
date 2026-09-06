@@ -247,6 +247,7 @@ export default function Page() {
             Human oversight, record-keeping, and monitoring. Deadlatch gives you the actual controls, open, and
             evidence an auditor can check without trusting us.
           </p>
+          <p><a className="ghlink" href="/audit">Run the free audit on your own setup ↗</a></p>
         </div>
         <div className="map">
           <div className="row enforce">

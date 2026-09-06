@@ -1498,3 +1498,22 @@ footer {
     animation: none;
   }
 }
+
+/* audit page */
+.af-cli{margin-top:10px;font-size:.9rem;opacity:.85}
+.af-form{display:grid;gap:18px;margin-top:8px}
+.af-q{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0}
+.af-q legend{font-weight:600;padding:0 6px}
+.af-prompt{margin:4px 0 10px;opacity:.8}
+.af-field{display:grid;gap:4px;margin:8px 0;font-size:.92rem}
+.af-field input,.af-field select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:inherit}
+.af-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.af-note{opacity:.75;font-size:.9rem}
+.af-readout{margin-top:32px;border-top:1px solid var(--line);padding-top:18px}
+.af-readout h3{margin:18px 0 6px;font-size:1.02rem}
+.af-readout h3 .mono{opacity:.6;margin-right:8px}
+.af-tools{display:flex;gap:10px;flex-wrap:wrap}
+.af-exposure li{margin:6px 0}
+.af-exposure li.exposed .af-verdict{color:#ff7a6e}.af-exposure li.partial .af-verdict{color:#f0c060}.af-exposure li.closed .af-verdict{color:#5fd39a}.af-exposure li.unknown .af-verdict{opacity:.7}
+.af-ask,.af-fix{opacity:.8}
+.af-last{margin-top:14px}
