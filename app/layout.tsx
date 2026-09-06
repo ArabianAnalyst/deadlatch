@@ -5,7 +5,7 @@ import SiteNav from "@/components/SiteNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://deadlatch.dev"),
+  metadataBase: new URL("https://www.deadlatch.dev"),
   title: "Deadlatch — Runtime governance for AI agents",
   description:
     "The open runtime governance stack for AI agents. Enforce what an agent can do, prove what it did, and watch for what slipped through. Purse, blackbox, Tripwire. Open, composable, verifiable.",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "Deadlatch — Runtime governance for AI agents",
     description:
       "Enforce what an agent can do, prove what it did, and watch for what slipped through. Open, composable, verifiable.",
-    url: "https://deadlatch.dev",
+    url: "https://www.deadlatch.dev",
     siteName: "Deadlatch",
     type: "website",
   },

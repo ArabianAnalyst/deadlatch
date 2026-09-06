@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "The Log — Deadlatch",
   description:
     "Notes on governing AI agents that act. Enforcement, tamper-evident proof, and the problems still open, written from the build.",
-  alternates: { canonical: "https://deadlatch.dev/log" },
+  alternates: { canonical: "https://www.deadlatch.dev/log" },
 };
 
 export default function LogIndex() {

@@ -18,13 +18,15 @@ export async function generateMetadata({
   return {
     title: `${post.meta.title} — Deadlatch`,
     description: post.meta.description,
-    alternates: { canonical: `https://deadlatch.dev/log/${slug}` },
+    alternates: { canonical: `https://www.deadlatch.dev/log/${slug}` },
     openGraph: {
       title: post.meta.title,
       description: post.meta.description,
-      url: `https://deadlatch.dev/log/${slug}`,
+      url: `https://www.deadlatch.dev/log/${slug}`,
       type: "article",
+      images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
     },
+    twitter: { card: "summary_large_image", title: post.meta.title, description: post.meta.description },
   };
 }
 

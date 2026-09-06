@@ -1525,3 +1525,8 @@ footer {
 .af-last{margin-top:14px}
 .af-last a{color:var(--allow);text-decoration:underline;text-underline-offset:3px}
 @media (max-width:640px){.af-q{padding:14px 14px}.af-readout h3{margin-top:18px}}
+
+/* not found */
+.nf-links{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.nf-links a{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;transition:.15s border-color,.15s background}
+.nf-links a:hover{border-color:var(--line2);background:var(--panel)}
