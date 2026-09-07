@@ -112,7 +112,7 @@ export default function AuditForm() {
           <p>Forgery {readout.open.forgery}, misdirection {readout.open.misdirection}. {readout.open.why}</p>
           <h3><span className="mono">6</span> Shortest path</h3>
           <ol>{readout.shortestPath.map((s, i) => <li key={i}>{s.step}</li>)}</ol>
-          <p className="af-last">{readout.lastLine.replace(/https?:\/\/\S+/, "")}<a href="https://olurabian.com/work">olurabian.com/work</a></p>
+          <p className="af-last">{readout.lastLine.replace(/https?:\/\/\S+/, "")}<a href="https://olurabian.com/deadlatch">olurabian.com/deadlatch</a></p>
           {readout.notes.length > 0 && (<><h3>Notes you gave</h3><ul>{readout.notes.map((n, i) => <li key={i}>{n.text}</li>)}</ul></>)}
         </section>
       )}
