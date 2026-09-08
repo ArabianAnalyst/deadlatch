@@ -1,0 +1,45 @@
+{
+  "stream": "purse",
+  "anchors": [
+    {
+      "v": 1,
+      "stream": "purse",
+      "seq": 5,
+      "head": "3c9fce3d458d4d931c1a95a712ba44d1d39480c6079248a9586b1b0ce1a11c63",
+      "at": "2026-09-08T20:05:11.484Z",
+      "witness": {
+        "alg": "ecdsa-p256",
+        "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEq/VhzmgczlJPDPdH2jpPHB/CfBN9aHgO75EO/KP60Rjl7QRI3q8W7gY2bekUV+R2hutZI6GFLAjpvN1rUjMuQQ=="
+      },
+      "signature": "MEQCIAa7MyjdmD+ubAqF1tZXPO96pOd0rcopKHLS044XEE0tAiAlrCiTW0DlbJgtn8VPqZmgxo6FJEVeITQSCED2jBqNTg==",
+      "log": {
+        "url": "https://log2025-1.rekor.sigstore.dev",
+        "keyId": "zxGZFVvd0FEmjR8WrFwMdcAJ9vtaY/QXf44Y1wUeP6A="
+      },
+      "entry": {
+        "logIndex": "101844748",
+        "canonicalizedBody": "eyJhcGlWZXJzaW9uIjoiMC4wLjIiLCJraW5kIjoiaGFzaGVkcmVrb3JkIiwic3BlYyI6eyJoYXNoZWRSZWtvcmRWMDAyIjp7ImRhdGEiOnsiYWxnb3JpdGhtIjoiU0hBMl8yNTYiLCJkaWdlc3QiOiIzU3l1eDNpN3FZOWpFbmNqV2dXQ1NQSGZmMXErcWZOM1V5SngxUWtzNDRRPSJ9LCJzaWduYXR1cmUiOnsiY29udGVudCI6Ik1FUUNJQWE3TXlqZG1EK3ViQXFGMXRaWFBPOTZwT2QwcmNvcEtITFMwNDRYRUUwdEFpQWxyQ2lUVzBEbGJKZ3RuOFZQcVptZ3hvNkZKRVZlSVRRU0NFRDJqQnFOVGc9PSIsInZlcmlmaWVyIjp7ImtleURldGFpbHMiOiJQS0lYX0VDRFNBX1AyNTZfU0hBXzI1NiIsInB1YmxpY0tleSI6eyJyYXdCeXRlcyI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRXEvVmh6bWdjemxKUERQZEgyanBQSEIvQ2ZCTjlhSGdPNzVFTy9LUDYwUmpsN1FSSTNxOFc3Z1kyYmVrVVYrUjJodXRaSTZHRkxBanB2TjFyVWpNdVFRPT0ifX19fX19"
+      },
+      "proof": {
+        "logIndex": "101844748",
+        "treeSize": "101844758",
+        "rootHash": "LM0pu8sGIQ/1MSkKnd6o8qxsfnt4WgW1RopNpTLgFSY=",
+        "hashes": [
+          "bA0PuFBmqo76QALs+dnoAYV0oqZRdP/vAbz4VH+mpSY=",
+          "2zucWtZkfQ+cAT7JAgdxyzQPL7ynN7LEmlI/EBoR/bQ=",
+          "PhY+YBhDljFg+DGCkvcUBT8XIFuGsAx4WlMxWTTNm7s=",
+          "HEjkXVqzWs/NnancwkUJXvkcN4e2qktdAtpF/pm9+5w=",
+          "FqPhYAnQbDz5T8T5nlC2ke6hWCKGQFEpevuf2uIsa7E=",
+          "UDppSV92VGo7hYxAJ7vpWb920rq9x46do5eJfZ++00s=",
+          "4OLOyokSvxOBSMfN7UuRpZd60xY8m+XImI4nOvztyE0=",
+          "bl/3EJaqpq9CMTYu1jIxVb65zb/+PIN9/CSjfRPUgKs=",
+          "Udwi2StRdR2FeN5kR7XibvDG3j8aN+xWZDw+3TksQ4E=",
+          "2XEyRxNQOAJtI9Ax+2dqANJpCIKH/7nciJ+ENHpPzPk=",
+          "DECASkV0PLAoTmCeGsJLmGUoDnCLklA8TLwgwSRKqR4=",
+          "sDYoZXiXRY28yAw+Ct6svsySOEvSboUP6XGd0w9Avn8="
+        ],
+        "checkpoint": "log2025-1.rekor.sigstore.dev\n101844758\nLM0pu8sGIQ/1MSkKnd6o8qxsfnt4WgW1RopNpTLgFSY=\n\n— log2025-1.rekor.sigstore.dev zxGZFRyFLqxRqxSsvZTQX8XmY1XSDookDmvHCiCMa0zZFZVmXLCa8/W0Q4nigCuuxvaHM0BDeUHUQYz29l4bIn1ZVwQ=\n— witness.stagemole.eu Z/euoAAAAABqoGp2R60uBsRCVrcXIDHcHa4jfO668N4H7Gy1UsyW4VIZb5ZpYCcpYkHyLBHeQAdrv4hUuviqbDw4Zz8I3T10jPkJAw==\n— witness.navigli.sunlight.geomys.org o+AP4gAAAABqoGp2y9SIuXO9r+sYEDQ2DK7oN/tyRv7RwWEpO65Y6wIe5Yk6ElHcYuaG4ycGxQ0H1WMmyYpZFK6M/5kPzYWyprVEDg==\n— staging.witness.transparency.goog/ring-any-bells LhqNyQAAAABqoGp2Kwred6OmeOkLjds2kFiP8y2QVeB7WSOdWdyB1ktrDwsZokAv2y7+ziN8d8jegGKzcRWBEJau54Ulk7qRxFu5Bg==\n"
+      }
+    }
+  ]
+}

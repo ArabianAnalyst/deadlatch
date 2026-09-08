@@ -1,0 +1,16 @@
+Deadlatch reference broker, the witness. Two public keys and nothing else.
+
+Rekor v2 log key
+Taken from https://raw.githubusercontent.com/sigstore/root-signing/main/targets/trusted_root.json (tlogs[].publicKey.rawBytes for log2025-1).
+log2025-1.rekor.sigstore.dev=MCowBQYDK2VwAyEAt8rlp1knGwjfbcXAYPYAkn0XiLz1x8O4t0YkEhie244=
+
+Witness key
+ECDSA P-256, SPKI DER, base64, as served by the witness index.
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEq/VhzmgczlJPDPdH2jpPHB/CfBN9aHgO75EO/KP60Rjl7QRI3q8W7gY2bekUV+R2hutZI6GFLAjpvN1rUjMuQQ==
+
+Files
+chain.json    the receipt chain as exported from the broker on 2026-09-08 (6 records)
+anchors.json  the anchors as served by the witness (1 anchor, seq 5, Rekor v2 log index 101844748)
+
+Verify
+npx -p @olurabian/receipt receipt-verify chain.json --anchors anchors.json --log-key <log key line above> --witness-key <witness key above> --stream purse

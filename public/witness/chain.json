@@ -1,0 +1,271 @@
+[
+  {
+    "id": "1a8fd4e6-6488-44da-99d5-bb97b6cc2b47",
+    "ts": "2026-09-06T08:49:16.921Z",
+    "kind": "decision",
+    "payload": {
+      "request": {
+        "amount": {
+          "amount": 1250,
+          "currency": "USD"
+        },
+        "payee": "api.stripe.com",
+        "intent": "credits"
+      },
+      "status": "allowed",
+      "reason": "within policy",
+      "policyVersion": "d28636c89943",
+      "event": "grant_minted",
+      "explain": {
+        "rule": "within-policy",
+        "policyVersion": "d28636c89943",
+        "evaluated": {
+          "amount": {
+            "amount": 1250,
+            "currency": "USD"
+          },
+          "payee": "api.stripe.com"
+        },
+        "grant": {
+          "id": "c56a73b8-ed22-4944-b34e-26590cd21c6b",
+          "boundTo": {
+            "payee": "api.stripe.com",
+            "amount": {
+              "amount": 1250,
+              "currency": "USD"
+            },
+            "intent": "credits"
+          },
+          "origin": "policy"
+        },
+        "approvedBy": "policy:auto"
+      },
+      "grantId": "c56a73b8-ed22-4944-b34e-26590cd21c6b"
+    },
+    "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "hash": "26cdbd54f53403c198beef3fb3807dbe9afbde14cbc746d825d278459fd6fc8f"
+  },
+  {
+    "id": "cc23a7d3-5138-4ad9-9b1f-8d5de73921a1",
+    "ts": "2026-09-06T08:49:17.825Z",
+    "kind": "decision",
+    "payload": {
+      "request": {
+        "amount": {
+          "amount": 1250,
+          "currency": "USD"
+        },
+        "payee": "api.stripe.com",
+        "intent": "credits"
+      },
+      "status": "allowed",
+      "reason": "executed",
+      "policyVersion": "d28636c89943",
+      "event": "executed",
+      "explain": {
+        "rule": "within-policy",
+        "policyVersion": "d28636c89943",
+        "evaluated": {
+          "amount": {
+            "amount": 1250,
+            "currency": "USD"
+          },
+          "payee": "api.stripe.com"
+        },
+        "grant": {
+          "id": "c56a73b8-ed22-4944-b34e-26590cd21c6b",
+          "boundTo": {
+            "payee": "api.stripe.com",
+            "amount": {
+              "amount": 1250,
+              "currency": "USD"
+            },
+            "intent": "credits"
+          },
+          "origin": "policy"
+        },
+        "approvedBy": "policy:auto",
+        "receipt": {
+          "ok": true,
+          "ref": "mock_c56a73b8",
+          "paidAmount": {
+            "amount": 1250,
+            "currency": "USD"
+          }
+        }
+      },
+      "grantId": "c56a73b8-ed22-4944-b34e-26590cd21c6b",
+      "receipt": {
+        "ok": true,
+        "ref": "mock_c56a73b8",
+        "paidAmount": {
+          "amount": 1250,
+          "currency": "USD"
+        }
+      }
+    },
+    "prevHash": "26cdbd54f53403c198beef3fb3807dbe9afbde14cbc746d825d278459fd6fc8f",
+    "hash": "4c13e67a2ae19c28b05f07e93e8f0783c25b1a24129ae868b2ef64ebcad745ef"
+  },
+  {
+    "id": "20d053ce-3d85-4abd-a3dc-232ee423391a",
+    "ts": "2026-09-06T08:49:18.339Z",
+    "kind": "decision",
+    "payload": {
+      "request": {
+        "amount": {
+          "amount": 3500,
+          "currency": "USD"
+        },
+        "payee": "api.stripe.com",
+        "intent": "annual plan"
+      },
+      "status": "needs_approval",
+      "reason": "needs approval: 35.00 USD is above the auto-approve threshold of 20.00 USD",
+      "policyVersion": "d28636c89943",
+      "event": "decision",
+      "explain": {
+        "rule": "require-approval",
+        "policyVersion": "d28636c89943",
+        "evaluated": {
+          "amount": {
+            "amount": 3500,
+            "currency": "USD"
+          },
+          "payee": "api.stripe.com"
+        }
+      }
+    },
+    "prevHash": "4c13e67a2ae19c28b05f07e93e8f0783c25b1a24129ae868b2ef64ebcad745ef",
+    "hash": "84f717058c34e9e3666a152d83e557acdc26ce09f93793cb535fb1da276addc0"
+  },
+  {
+    "id": "a447d558-24f3-4288-96d0-3e20a870c0fe",
+    "ts": "2026-09-06T08:49:34.125Z",
+    "kind": "decision",
+    "payload": {
+      "request": {
+        "amount": {
+          "amount": 0,
+          "currency": "USD"
+        },
+        "payee": "?"
+      },
+      "status": "denied",
+      "reason": "rejected: grant not found",
+      "policyVersion": "d28636c89943",
+      "event": "execution_failed",
+      "grantId": "undefined"
+    },
+    "prevHash": "84f717058c34e9e3666a152d83e557acdc26ce09f93793cb535fb1da276addc0",
+    "hash": "77c1577388ce00201f2699c82f31f973284b5fbb428dd9a05890ee2ee1b7d3f6"
+  },
+  {
+    "id": "bd3b5ee6-52c2-4854-9069-330e5eb6f9c7",
+    "ts": "2026-09-06T09:00:39.606Z",
+    "kind": "decision",
+    "payload": {
+      "request": {
+        "amount": {
+          "amount": 3500,
+          "currency": "USD"
+        },
+        "payee": "api.stripe.com",
+        "intent": "annual plan"
+      },
+      "status": "allowed",
+      "reason": "principal approved",
+      "policyVersion": "d28636c89943",
+      "event": "grant_minted",
+      "explain": {
+        "rule": "within-policy",
+        "policyVersion": "d28636c89943",
+        "evaluated": {
+          "amount": {
+            "amount": 3500,
+            "currency": "USD"
+          },
+          "payee": "api.stripe.com"
+        },
+        "grant": {
+          "id": "abd857ee-011c-47f5-8ca6-5b202f333dfd",
+          "boundTo": {
+            "payee": "api.stripe.com",
+            "amount": {
+              "amount": 3500,
+              "currency": "USD"
+            },
+            "intent": "annual plan"
+          },
+          "origin": "principal"
+        },
+        "approvedBy": "principal:d0ea8695984596a4"
+      },
+      "grantId": "abd857ee-011c-47f5-8ca6-5b202f333dfd"
+    },
+    "prevHash": "77c1577388ce00201f2699c82f31f973284b5fbb428dd9a05890ee2ee1b7d3f6",
+    "hash": "8c5770af9853dd35c5b474093e63a6940b3d49d936b6bb8c01a65d47af02e08d"
+  },
+  {
+    "id": "fe25a6ac-a9b6-4cd0-b761-bc4cc25e2116",
+    "ts": "2026-09-06T09:00:41.623Z",
+    "kind": "decision",
+    "payload": {
+      "request": {
+        "amount": {
+          "amount": 3500,
+          "currency": "USD"
+        },
+        "payee": "api.stripe.com",
+        "intent": "annual plan"
+      },
+      "status": "allowed",
+      "reason": "executed",
+      "policyVersion": "d28636c89943",
+      "event": "executed",
+      "explain": {
+        "rule": "within-policy",
+        "policyVersion": "d28636c89943",
+        "evaluated": {
+          "amount": {
+            "amount": 3500,
+            "currency": "USD"
+          },
+          "payee": "api.stripe.com"
+        },
+        "grant": {
+          "id": "abd857ee-011c-47f5-8ca6-5b202f333dfd",
+          "boundTo": {
+            "payee": "api.stripe.com",
+            "amount": {
+              "amount": 3500,
+              "currency": "USD"
+            },
+            "intent": "annual plan"
+          },
+          "origin": "principal"
+        },
+        "approvedBy": "principal:d0ea8695984596a4",
+        "receipt": {
+          "ok": true,
+          "ref": "mock_abd857ee",
+          "paidAmount": {
+            "amount": 3500,
+            "currency": "USD"
+          }
+        }
+      },
+      "grantId": "abd857ee-011c-47f5-8ca6-5b202f333dfd",
+      "receipt": {
+        "ok": true,
+        "ref": "mock_abd857ee",
+        "paidAmount": {
+          "amount": 3500,
+          "currency": "USD"
+        }
+      }
+    },
+    "prevHash": "8c5770af9853dd35c5b474093e63a6940b3d49d936b6bb8c01a65d47af02e08d",
+    "hash": "3c9fce3d458d4d931c1a95a712ba44d1d39480c6079248a9586b1b0ce1a11c63"
+  }
+]
