@@ -9,7 +9,7 @@
     <a href="https://www.npmjs.com/package/@olurabian/tripwire"><img src="https://img.shields.io/npm/v/@olurabian/tripwire?style=for-the-badge&label=tripwire&color=FB5B4B" alt="tripwire on npm" /></a>
     <a href="https://deadlatch.dev"><img src="https://img.shields.io/website?url=https%3A%2F%2Fdeadlatch.dev&style=for-the-badge&label=deadlatch.dev&up_color=1B34E0&up_message=live" alt="deadlatch.dev" /></a>
   </p>
-  <p><sub><b>enforce</b> &nbsp;·&nbsp; <b>prove</b> &nbsp;·&nbsp; <b>watch</b> &nbsp;—&nbsp; three small packages, one control loop</sub></p>
+  <p><sub><b>enforce</b> &nbsp;·&nbsp; <b>prove</b> &nbsp;·&nbsp; <b>watch</b> &nbsp;·&nbsp; three small packages, one control loop</sub></p>
 </div>
 
 You can't trust a black box to govern your black box. Deadlatch is three open primitives you can read, run, and verify yourself. Adopt one on its own, or run all three around every action an agent takes.
@@ -32,6 +32,10 @@ The site behind [deadlatch.dev](https://deadlatch.dev). Next.js (App Router), de
 npm install
 npm run dev
 ```
+
+## Watch
+
+The hosted side of the Deadlatch monitor lives under `/app`. See `docs/watch.md` for what it holds, what the API accepts, and the six environment variables it needs. The public pages need none of them.
 
 ## Links
 
