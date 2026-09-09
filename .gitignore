@@ -7,3 +7,6 @@ next-env.d.ts
 .env*.local
 .vercel
 .DS_Store
+.env*
+crawl-before.txt
+crawl-after.txt
