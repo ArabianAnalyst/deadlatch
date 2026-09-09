@@ -60,10 +60,10 @@ describe("maybeAlert", () => {
     expect(r).toEqual({ sent: false, error: "resend down" });
     expect(await db.select().from(alerts)).toHaveLength(0);
   });
-  it("does nothing without an owner email or with no new flags", async () => {
+  it("reports a missing owner email as an error and does nothing with no new flags", async () => {
     const { mailer, sent } = fakeMailer();
     const [p] = await db.insert(projects).values({ ownerId: "user_z", name: "x", stream: "s" }).returning();
-    expect(await maybeAlert(db, mailer, email, p.id, ["1".padStart(64, "0")], new Date())).toEqual({ sent: false });
+    expect(await maybeAlert(db, mailer, email, p.id, ["1".padStart(64, "0")], new Date())).toEqual({ sent: false, error: "owner email not found" });
     expect(await maybeAlert(db, mailer, email, projectId, [], new Date())).toEqual({ sent: false });
     expect(sent).toHaveLength(0);
   });

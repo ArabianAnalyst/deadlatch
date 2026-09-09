@@ -24,7 +24,11 @@ export async function maybeAlert(db: Db, mailer: Mailer, ownerEmail: OwnerEmail,
   const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
   if (!project) return { sent: false };
   const to = await ownerEmail(project.ownerId);
-  if (!to) return { sent: false };
+  if (!to) {
+    const error = "owner email not found";
+    console.error("deadlatch alert failed", { projectId, error });
+    return { sent: false, error };
+  }
   const [last] = await db.select({ sentAt: alerts.sentAt }).from(alerts).where(eq(alerts.projectId, projectId)).orderBy(desc(alerts.sentAt)).limit(1);
   if (last && now.getTime() - last.sentAt.getTime() < project.alertQuietMs) return { sent: false };
   const alreadySent = new Set((await db.select({ flagId: alerts.flagId }).from(alerts).where(and(eq(alerts.projectId, projectId), inArray(alerts.flagId, flagIds)))).map((r) => r.flagId));
