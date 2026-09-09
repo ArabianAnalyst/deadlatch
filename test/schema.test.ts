@@ -9,6 +9,8 @@ describe("schema", () => {
     const [p] = await db.insert(projects).values({ ownerId: "user_a", name: "ref", stream: "purse" }).returning();
     expect(p.alertQuietMs).toBe(21_600_000);
     await db.insert(projectKeys).values({ projectId: p.id, prefix: "aaaabbbb", hash: "h".repeat(64) });
+    const dupKey = await db.insert(projectKeys).values({ projectId: p.id, prefix: "aaaabbbb", hash: "h".repeat(64) }).onConflictDoNothing().returning({ id: projectKeys.id });
+    expect(dupKey).toHaveLength(0);
     await db.insert(monitors).values({ projectId: p.id, version: "0.3.1", stream: "purse", cursorSeq: 6, intervalMs: 60000 });
     const flag = { id: "f".repeat(64), projectId: p.id, expectationId: "executed-once", reason: "twice", offender: { action: "executed" }, cause: { amount: 1 }, ref: { stream: "purse", seq: 6, id: "x", hash: "0".repeat(64), ts: "2026-09-09T00:00:00.000Z" }, window: { fromSeq: 1, toSeq: 6, count: 6, matched: [] }, at: new Date("2026-09-09T00:00:00.000Z") };
     await db.insert(flags).values(flag);
