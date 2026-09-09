@@ -1,4 +1,4 @@
-import { bigint, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { bigint, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 export const projects = pgTable(
   "projects",
@@ -56,7 +56,9 @@ export const alerts = pgTable(
   {
     projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
     flagId: text("flag_id").notNull().references(() => flags.id, { onDelete: "cascade" }),
+    /** floor(sentAt / the project's quiet period at claim time), so two claims inside one window collide whatever their flags. */
+    bucket: bigint("bucket", { mode: "number" }).notNull(),
     sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [primaryKey({ columns: [t.projectId, t.flagId] }), index("alerts_project_sent").on(t.projectId, t.sentAt)],
+  (t) => [primaryKey({ columns: [t.projectId, t.flagId] }), uniqueIndex("alerts_project_bucket").on(t.projectId, t.bucket), index("alerts_project_sent").on(t.projectId, t.sentAt)],
 );

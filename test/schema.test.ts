@@ -16,8 +16,8 @@ describe("schema", () => {
     await db.insert(flags).values(flag);
     const dup = await db.insert(flags).values(flag).onConflictDoNothing().returning({ id: flags.id });
     expect(dup).toHaveLength(0);
-    await db.insert(alerts).values({ projectId: p.id, flagId: flag.id });
-    const again = await db.insert(alerts).values({ projectId: p.id, flagId: flag.id }).onConflictDoNothing().returning({ flagId: alerts.flagId });
+    await db.insert(alerts).values({ projectId: p.id, flagId: flag.id, bucket: 0 });
+    const again = await db.insert(alerts).values({ projectId: p.id, flagId: flag.id, bucket: 0 }).onConflictDoNothing().returning({ flagId: alerts.flagId });
     expect(again).toHaveLength(0);
     const [m] = await db.select().from(monitors).where(eq(monitors.projectId, p.id));
     expect(m.cursorSeq).toBe(6);

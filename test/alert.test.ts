@@ -49,7 +49,7 @@ describe("maybeAlert", () => {
   });
   it("picks the oldest flag of a batch and never sends twice for one flag", async () => {
     const { mailer, sent } = fakeMailer();
-    await db.insert(alerts).values({ projectId, flagId: "2".padStart(64, "0"), sentAt: new Date("2026-09-09T05:00:00.000Z") });
+    await db.insert(alerts).values({ projectId, flagId: "2".padStart(64, "0"), bucket: Math.floor(Date.parse("2026-09-09T05:00:00.000Z") / (6 * 3_600_000)), sentAt: new Date("2026-09-09T05:00:00.000Z") });
     const r = await maybeAlert(db, mailer, email, projectId, ["2".padStart(64, "0"), "3".padStart(64, "0")], new Date("2026-09-09T12:00:00.000Z"));
     expect(r).toEqual({ sent: true, flagId: "3".padStart(64, "0") });
     expect(sent).toHaveLength(1);
@@ -66,5 +66,16 @@ describe("maybeAlert", () => {
     expect(await maybeAlert(db, mailer, email, p.id, ["1".padStart(64, "0")], new Date())).toEqual({ sent: false });
     expect(await maybeAlert(db, mailer, email, projectId, [], new Date())).toEqual({ sent: false });
     expect(sent).toHaveLength(0);
+  });
+  it("two concurrent batches with different flags in the same instant send exactly one email", async () => {
+    const { mailer, sent } = fakeMailer();
+    const now = new Date("2026-09-09T12:00:10.000Z");
+    const results = await Promise.all([
+      maybeAlert(db, mailer, email, projectId, ["1".padStart(64, "0")], now),
+      maybeAlert(db, mailer, email, projectId, ["2".padStart(64, "0")], now),
+    ]);
+    expect(results.filter((r) => r.sent)).toHaveLength(1);
+    expect(sent).toHaveLength(1);
+    expect(await db.select().from(alerts)).toHaveLength(1);
   });
 });

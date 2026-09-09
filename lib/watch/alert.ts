@@ -15,9 +15,9 @@ function describeCause(cause: unknown): string {
 }
 
 /**
- * One email per project per quiet period, on the first new flag after silence. The alerts table's primary key
- * is what makes a double send impossible under concurrent batches. A failed send removes the row so the next
- * flag retries.
+ * One email per project per quiet period, on the first new flag after silence. The window bucket's unique index
+ * is what makes a double send impossible under concurrent batches, and the sliding check stops boundary doubles.
+ * A failed send removes the row so the next flag retries.
  */
 export async function maybeAlert(db: Db, mailer: Mailer, ownerEmail: OwnerEmail, projectId: string, flagIds: string[], now: Date = new Date(), origin = "https://www.deadlatch.dev"): Promise<{ sent: boolean; flagId?: string }> {
   if (flagIds.length === 0) return { sent: false };
@@ -31,7 +31,8 @@ export async function maybeAlert(db: Db, mailer: Mailer, ownerEmail: OwnerEmail,
   const candidates = await db.select().from(flags).where(and(eq(flags.projectId, projectId), inArray(flags.id, flagIds.filter((id) => !alreadySent.has(id))))).orderBy(flags.at, flags.id);
   const flag = candidates[0];
   if (!flag) return { sent: false };
-  const claimed = await db.insert(alerts).values({ projectId, flagId: flag.id, sentAt: now }).onConflictDoNothing().returning({ flagId: alerts.flagId });
+  const bucket = Math.floor(now.getTime() / project.alertQuietMs);
+  const claimed = await db.insert(alerts).values({ projectId, flagId: flag.id, bucket, sentAt: now }).onConflictDoNothing().returning({ flagId: alerts.flagId });
   if (claimed.length === 0) return { sent: false };
   const link = `${origin}/app/${projectId}/flags/${flag.id}`;
   const ref = flag.ref as { seq?: number };

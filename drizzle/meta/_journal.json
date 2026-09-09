@@ -8,6 +8,13 @@
       "when": 1788983201994,
       "tag": "0000_lush_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788987867379,
+      "tag": "0001_awesome_morbius",
+      "breakpoints": true
     }
   ]
 }
