@@ -32,7 +32,7 @@ describe("projects and keys", () => {
   });
   it("rotates the key, revoking the old one, and keyInfo reports the live one", async () => {
     const { project, key } = await createProject(db, "user_a", "p", "purse");
-    const rotated = await rotateKey(db, project.id);
+    const rotated = await rotateKey(db, "user_a", project.id);
     expect(rotated.key).not.toBe(key);
     const rows = await db.select().from(projectKeys).where(eq(projectKeys.projectId, project.id));
     expect(rows.filter((r) => r.revokedAt).map((r) => r.hash)).toEqual([hashKey(key)]);
@@ -42,9 +42,9 @@ describe("projects and keys", () => {
   });
   it("setQuiet bounds the period to one minute or more", async () => {
     const { project } = await createProject(db, "user_a", "p", "purse");
-    await setQuiet(db, project.id, 3_600_000);
+    await setQuiet(db, "user_a", project.id, 3_600_000);
     expect((await projectFor(db, "user_a", project.id))?.alertQuietMs).toBe(3_600_000);
-    await expect(setQuiet(db, project.id, 5)).rejects.toThrow(/at least/);
+    await expect(setQuiet(db, "user_a", project.id, 5)).rejects.toThrow(/at least/);
   });
 });
 
@@ -53,6 +53,8 @@ describe("dashboard", () => {
     const { project } = await createProject(db, "user_a", "p", "purse");
     expect((await dashboard(db, project.id, NOW)).monitor.state).toBe("never");
     await db.insert(monitors).values({ projectId: project.id, version: "0.3.1", stream: "purse", cursorSeq: 6, intervalMs: 60_000, lastHeartbeatAt: new Date(NOW.getTime() - 30_000) });
+    await db.update(monitors).set({ lastAlertError: "resend down" }).where(eq(monitors.projectId, project.id));
+    expect((await dashboard(db, project.id, NOW)).monitor.lastAlertError).toBe("resend down");
     expect((await dashboard(db, project.id, NOW)).monitor.state).toBe("ok");
     await db.update(monitors).set({ lastHeartbeatAt: new Date(NOW.getTime() - 150_000) }).where(eq(monitors.projectId, project.id));
     expect((await dashboard(db, project.id, NOW)).monitor.state).toBe("amber");
@@ -69,6 +71,11 @@ describe("dashboard", () => {
     expect(d.recent[0].payee).toBe("api.stripe.com");
     expect(d.recent[0].amount).toBe("1250 USD");
   });
+  it("orders flags of one batch by receipt seq, newest seq first", async () => {
+    const { project } = await createProject(db, "user_a", "p", "purse");
+    await seedFlags(project.id, [{ n: 5, expectation: "executed-once", hoursAgo: 1 }, { n: 9, expectation: "executed-once", hoursAgo: 1 }, { n: 7, expectation: "executed-once", hoursAgo: 1 }]);
+    expect((await dashboard(db, project.id, NOW)).recent.map((f) => f.ref.seq)).toEqual([9, 7, 5]);
+  });
 });
 
 describe("flag detail", () => {
@@ -79,9 +86,26 @@ describe("flag detail", () => {
     const id = "1".padStart(64, "0");
     expect((await flagFor(db, project.id, id))?.expectationId).toBe("executed-once");
     expect(await flagFor(db, other.project.id, id)).toBeNull();
-    await acknowledge(db, project.id, id, NOW);
+    await acknowledge(db, "user_a", project.id, id, NOW);
     expect((await flagFor(db, project.id, id))?.acknowledgedAt?.toISOString()).toBe(NOW.toISOString());
-    await acknowledge(db, project.id, id, new Date(NOW.getTime() + 1000));
+    await acknowledge(db, "user_a", project.id, id, new Date(NOW.getTime() + 1000));
     expect((await flagFor(db, project.id, id))?.acknowledgedAt?.toISOString()).toBe(NOW.toISOString());
+  });
+});
+
+describe("ownership in the query layer", () => {
+  it("a stranger cannot rotate, requiet or acknowledge another owner's project", async () => {
+    const { project, key } = await createProject(db, "user_a", "p", "purse");
+    await seedFlags(project.id, [{ n: 1, expectation: "executed-once", hoursAgo: 1 }]);
+    const id = "1".padStart(64, "0");
+    await expect(rotateKey(db, "user_b", project.id)).rejects.toThrow(/not your project/);
+    expect((await keyInfo(db, project.id))?.prefix).toBe(key.slice(8, 16));
+    await expect(setQuiet(db, "user_b", project.id, 3_600_000)).rejects.toThrow(/not your project/);
+    await acknowledge(db, "user_b", project.id, id, NOW);
+    expect((await flagFor(db, project.id, id))?.acknowledgedAt).toBeNull();
+  });
+  it("setQuiet refuses more than thirty days", async () => {
+    const { project } = await createProject(db, "user_a", "p", "purse");
+    await expect(setQuiet(db, "user_a", project.id, 31 * 24 * 3_600_000)).rejects.toThrow(/at most thirty days/);
   });
 });

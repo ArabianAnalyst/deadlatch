@@ -57,7 +57,7 @@ describe("maybeAlert", () => {
   it("does not record the alert when the provider fails, so the next flag retries", async () => {
     const { mailer } = fakeMailer(true);
     const r = await maybeAlert(db, mailer, email, projectId, ["1".padStart(64, "0")], new Date("2026-09-09T12:00:10.000Z"));
-    expect(r).toEqual({ sent: false });
+    expect(r).toEqual({ sent: false, error: "resend down" });
     expect(await db.select().from(alerts)).toHaveLength(0);
   });
   it("does nothing without an owner email or with no new flags", async () => {

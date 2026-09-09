@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
 import { keyInfo, projectFor } from "@/lib/watch/queries";
 import { configLines } from "@/lib/watch/config-lines";
+import { KEY_PREFIX } from "@/lib/watch/keys";
 import { setQuietAction } from "@/app/app/actions";
 import RotateKey from "@/components/app/RotateKey";
 
@@ -28,7 +29,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ proje
       </header>
       <section className="app-card">
         <div className="eyebrow">Project key</div>
-        <p className="mono">{key ? `dl_live_${key.prefix}… made ${key.createdAt.toISOString().slice(0, 10)}` : "no live key"}</p>
+        <p className="mono">{key ? `${KEY_PREFIX}${key.prefix}… made ${key.createdAt.toISOString().slice(0, 10)}` : "no live key"}</p>
         <p>The broker's monitor reads these three lines. The key itself was shown once when it was made; rotating makes a new one and revokes the old one, and a monitor still using the old key stops with a 403.</p>
         <pre className="mono app-pre">{configLines(null, project.stream, ORIGIN)}</pre>
         <RotateKey projectId={project.id} stream={project.stream} origin={ORIGIN} />
@@ -38,7 +39,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ proje
         <p>One email on the first flag after a quiet period. Currently {Math.round(project.alertQuietMs / 3_600_000 * 10) / 10} hours.</p>
         <form action={setQuietAction} className="app-inline">
           <input type="hidden" name="projectId" value={project.id} />
-          <label>Quiet period, hours <input name="hours" type="number" min={0.02} step={0.5} defaultValue={project.alertQuietMs / 3_600_000} /></label>
+          <label>Quiet period, hours <input name="hours" type="number" min={0.02} max={720} step={0.5} defaultValue={project.alertQuietMs / 3_600_000} /></label>
           <button className="btn" type="submit">Save</button>
         </form>
       </section>

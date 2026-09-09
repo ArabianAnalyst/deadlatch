@@ -19,7 +19,7 @@ export default async function FlagPage({ params }: { params: Promise<{ project: 
   if (!flag) notFound();
   const ref = flag.ref as { stream: string; seq: number; id: string; hash: string; ts: string };
   const offender = flag.offender as { action: string; outcome?: string; input?: unknown };
-  const window = flag.window as { fromSeq: number; toSeq: number; count: number; matched: Array<{ seq: number; hash: string; ts: string }> };
+  const win = flag.window as { fromSeq: number; toSeq: number; count: number; matched: Array<{ seq: number; hash: string; ts: string }> };
   return (
     <main className="wrap logwrap app">
       <Link href={`/app/${project.id}`} className="log-back mono">← {project.name}</Link>
@@ -45,9 +45,9 @@ export default async function FlagPage({ params }: { params: Promise<{ project: 
       </section>
       <section className="app-card">
         <div className="eyebrow">The window that tripped it</div>
-        <p className="mono app-muted">seq {window.fromSeq} to {window.toSeq}, {window.count} records, {window.matched.length} matched this rule</p>
-        {window.matched.length > 0 ? (
-          <ul className="app-list mono">{window.matched.map((m) => <li key={m.seq}>seq {m.seq} · {m.hash.slice(0, 8)} · {m.ts}</li>)}</ul>
+        <p className="mono app-muted">seq {win.fromSeq} to {win.toSeq}, {win.count} records, {win.matched.length} matched this rule</p>
+        {win.matched.length > 0 ? (
+          <ul className="app-list mono">{win.matched.map((m) => <li key={m.seq}>seq {m.seq} · {m.hash.slice(0, 8)} · {m.ts}</li>)}</ul>
         ) : null}
       </section>
       <section className="app-card">

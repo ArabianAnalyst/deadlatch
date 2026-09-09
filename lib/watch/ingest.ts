@@ -5,7 +5,7 @@ import { hashKey, KEY_PREFIX } from "./keys";
 import { validateFlag as validateShape, type WireFlag } from "./flag-shape";
 
 export const MAX_FLAGS = 100;
-export const MAX_BYTES = 1_000_000;
+export const MAX_BYTES = 4_000_000;
 
 export type KeyResolution = { status: 401 | 403 } | { projectId: string };
 
@@ -67,7 +67,13 @@ export async function ingestFlags(db: Db, authorization: string | null, raw: unk
     .values({ projectId: key.projectId, version: meta.version, stream: meta.stream, intervalMs: meta.intervalMs, lastPushAt: at, lastFlagAt: newest })
     .onConflictDoUpdate({
       target: monitors.projectId,
-      set: { version: meta.version, stream: meta.stream, intervalMs: meta.intervalMs, lastPushAt: at, lastFlagAt: sql`greatest(coalesce(${monitors.lastFlagAt}, 'epoch'::timestamptz), coalesce(excluded.last_flag_at, 'epoch'::timestamptz))` },
+      set: {
+        version: sql`coalesce(excluded.version, ${monitors.version})`,
+        stream: sql`coalesce(excluded.stream, ${monitors.stream})`,
+        intervalMs: sql`coalesce(excluded.interval_ms, ${monitors.intervalMs})`,
+        lastPushAt: at,
+        lastFlagAt: sql`greatest(coalesce(${monitors.lastFlagAt}, 'epoch'::timestamptz), coalesce(excluded.last_flag_at, 'epoch'::timestamptz))`,
+      },
     });
   const newIds = inserted.map((r) => r.id);
   return { status: 202, body: { accepted: newIds.length, duplicates: list.length - newIds.length }, projectId: key.projectId, newIds };

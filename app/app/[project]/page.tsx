@@ -34,6 +34,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ projec
             {d.monitor.version ? `monitor ${d.monitor.version}` : "no monitor has reported"}
             {d.monitor.cursorSeq !== null ? ` · cursor ${d.monitor.cursorSeq}` : ""}
             {d.monitor.lastHeartbeatAt ? ` · last heartbeat ${d.monitor.lastHeartbeatAt.toISOString()}` : ""}
+            {d.monitor.lastAlertError ? ` · last alert failed, ${d.monitor.lastAlertError}` : d.monitor.lastAlertAt ? ` · last alert ${d.monitor.lastAlertAt.toISOString()}` : ""}
           </div>
         </div>
       </section>

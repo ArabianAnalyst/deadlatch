@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Db } from "@/lib/db/types";
 import { alerts, flags, projects } from "@/lib/db/schema";
 
@@ -19,7 +19,7 @@ function describeCause(cause: unknown): string {
  * is what makes a double send impossible under concurrent batches, and the sliding check stops boundary doubles.
  * A failed send removes the row so the next flag retries.
  */
-export async function maybeAlert(db: Db, mailer: Mailer, ownerEmail: OwnerEmail, projectId: string, flagIds: string[], now: Date = new Date(), origin = "https://www.deadlatch.dev"): Promise<{ sent: boolean; flagId?: string }> {
+export async function maybeAlert(db: Db, mailer: Mailer, ownerEmail: OwnerEmail, projectId: string, flagIds: string[], now: Date = new Date(), origin = "https://www.deadlatch.dev"): Promise<{ sent: boolean; flagId?: string; error?: string }> {
   if (flagIds.length === 0) return { sent: false };
   const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
   if (!project) return { sent: false };
@@ -28,7 +28,7 @@ export async function maybeAlert(db: Db, mailer: Mailer, ownerEmail: OwnerEmail,
   const [last] = await db.select({ sentAt: alerts.sentAt }).from(alerts).where(eq(alerts.projectId, projectId)).orderBy(desc(alerts.sentAt)).limit(1);
   if (last && now.getTime() - last.sentAt.getTime() < project.alertQuietMs) return { sent: false };
   const alreadySent = new Set((await db.select({ flagId: alerts.flagId }).from(alerts).where(and(eq(alerts.projectId, projectId), inArray(alerts.flagId, flagIds)))).map((r) => r.flagId));
-  const candidates = await db.select().from(flags).where(and(eq(flags.projectId, projectId), inArray(flags.id, flagIds.filter((id) => !alreadySent.has(id))))).orderBy(flags.at, flags.id);
+  const candidates = await db.select().from(flags).where(and(eq(flags.projectId, projectId), inArray(flags.id, flagIds.filter((id) => !alreadySent.has(id))))).orderBy(flags.at, sql`(${flags.ref}->>'seq')::bigint`);
   const flag = candidates[0];
   if (!flag) return { sent: false };
   const bucket = Math.floor(now.getTime() / project.alertQuietMs);
@@ -47,11 +47,14 @@ export async function maybeAlert(db: Db, mailer: Mailer, ownerEmail: OwnerEmail,
     "",
     "You get one of these per quiet period. Change the period in the project's settings.",
   ].filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n");
+  const clean = (s: string) => s.replace(/[\r\n\t]+/g, " ").slice(0, 120);
   try {
-    await mailer.send({ to, subject: `Deadlatch, ${flag.expectationId} on ${project.name}`, text });
-  } catch {
+    await mailer.send({ to, subject: `Deadlatch, ${clean(flag.expectationId)} on ${clean(project.name)}`, text });
+  } catch (e) {
+    const error = e instanceof Error ? e.message : String(e);
+    console.error("deadlatch alert failed", { projectId, flagId: flag.id, error });
     await db.delete(alerts).where(and(eq(alerts.projectId, projectId), eq(alerts.flagId, flag.id)));
-    return { sent: false };
+    return { sent: false, error };
   }
   return { sent: true, flagId: flag.id };
 }

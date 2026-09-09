@@ -30,7 +30,7 @@ export async function rotateKeyAction(_prev: KeyState, form: FormData): Promise<
   const projectId = String(form.get("projectId") ?? "");
   const project = await projectFor(db, ownerId, projectId);
   if (!project) return { key: null, projectId: null, stream: null, error: "not your project" };
-  const { key } = await rotateKey(db, projectId);
+  const { key } = await rotateKey(db, ownerId, projectId);
   revalidatePath(`/app/${projectId}/settings`);
   return { key, projectId, stream: project.stream, error: null };
 }
@@ -39,8 +39,7 @@ export async function acknowledgeAction(form: FormData): Promise<void> {
   const ownerId = await owner();
   const projectId = String(form.get("projectId") ?? "");
   const flagId = String(form.get("flagId") ?? "");
-  if (!(await projectFor(db, ownerId, projectId))) return;
-  await acknowledge(db, projectId, flagId);
+  await acknowledge(db, ownerId, projectId, flagId);
   revalidatePath(`/app/${projectId}/flags/${flagId}`);
   revalidatePath(`/app/${projectId}`);
 }
@@ -48,8 +47,12 @@ export async function acknowledgeAction(form: FormData): Promise<void> {
 export async function setQuietAction(form: FormData): Promise<void> {
   const ownerId = await owner();
   const projectId = String(form.get("projectId") ?? "");
-  if (!(await projectFor(db, ownerId, projectId))) return;
   const hours = Number(form.get("hours") ?? 6);
-  await setQuiet(db, projectId, Math.round(hours * 3_600_000));
+  const clamped = Math.min(720, Math.max(1 / 60, Number.isFinite(hours) ? hours : 6));
+  try {
+    await setQuiet(db, ownerId, projectId, Math.round(clamped * 3_600_000));
+  } catch (e) {
+    console.error("setQuiet refused", { projectId, error: e instanceof Error ? e.message : String(e) });
+  }
   revalidatePath(`/app/${projectId}/settings`);
 }

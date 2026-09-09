@@ -1,5 +1,7 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
+import { monitors } from "@/lib/db/schema";
 import { ingestFlags } from "@/lib/watch/ingest";
 import { maybeAlert } from "@/lib/watch/alert";
 import { resendMailer } from "@/lib/watch/mailer";
@@ -19,7 +21,14 @@ export async function POST(req: Request) {
   const r = await ingestFlags(db, req.headers.get("authorization"), raw, Buffer.byteLength(text, "utf8"));
   if (r.status === 202 && r.projectId && r.newIds && r.newIds.length > 0) {
     const origin = process.env.APP_ORIGIN ?? "https://www.deadlatch.dev";
-    await maybeAlert(db, resendMailer(), ownerEmail, r.projectId, r.newIds, new Date(), origin).catch(() => undefined);
+    const projectId = r.projectId;
+    try {
+      const a = await maybeAlert(db, resendMailer(), ownerEmail, projectId, r.newIds, new Date(), origin);
+      if (a.sent) await db.update(monitors).set({ lastAlertAt: new Date(), lastAlertError: null }).where(eq(monitors.projectId, projectId));
+      else if (a.error) await db.update(monitors).set({ lastAlertError: a.error }).where(eq(monitors.projectId, projectId));
+    } catch (e) {
+      console.error("deadlatch alert hook failed", { projectId, error: e instanceof Error ? e.message : String(e) });
+    }
   }
   return NextResponse.json(r.body, { status: r.status });
 }

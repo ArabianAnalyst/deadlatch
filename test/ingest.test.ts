@@ -68,7 +68,7 @@ describe("ingestFlags", () => {
     expect(await db.select().from(flags)).toHaveLength(0);
   });
   it("answers 413 over a megabyte or over a hundred flags, before touching the database", async () => {
-    expect((await ingestFlags(db, `Bearer ${KEY}`, body([flag(1)]), 1_000_001, NOW)).status).toBe(413);
+    expect((await ingestFlags(db, `Bearer ${KEY}`, body([flag(1)]), 4_000_001, NOW)).status).toBe(413);
     const many = Array.from({ length: 101 }, (_, i) => flag(i + 1));
     expect((await ingestFlags(db, `Bearer ${KEY}`, body(many), 10, NOW)).status).toBe(413);
     expect(await db.select().from(flags)).toHaveLength(0);
@@ -87,6 +87,20 @@ describe("ingestFlags", () => {
     expect(r.status).toBe(202);
     const rows = await db.select().from(flags);
     expect(rows[0].projectId).toBe(projectId);
+  });
+  it("a batch without a monitor block keeps the monitor's version, stream and interval", async () => {
+    await ingestFlags(db, `Bearer ${KEY}`, body([flag(1)]), 10, NOW);
+    await ingestFlags(db, `Bearer ${KEY}`, { flags: [flag(2)] }, 10, NOW);
+    const [m] = await db.select().from(monitors).where(eq(monitors.projectId, projectId));
+    expect(m.version).toBe("0.3.1");
+    expect(m.intervalMs).toBe(60000);
+  });
+  it("lastFlagAt never moves backwards across batches", async () => {
+    await ingestFlags(db, `Bearer ${KEY}`, body([flag(1)]), 10, NOW);
+    const older = { ...flag(2), at: "2026-09-09T11:00:00.000Z" };
+    await ingestFlags(db, `Bearer ${KEY}`, body([older]), 10, NOW);
+    const [m] = await db.select().from(monitors).where(eq(monitors.projectId, projectId));
+    expect(m.lastFlagAt?.toISOString()).toBe(ISO);
   });
 });
 

@@ -26,7 +26,8 @@ export async function createProject(db: Db, ownerId: string, name: string, strea
   return { project, key };
 }
 
-export async function rotateKey(db: Db, projectId: string): Promise<{ key: string; prefix: string }> {
+export async function rotateKey(db: Db, ownerId: string, projectId: string): Promise<{ key: string; prefix: string }> {
+  if (!(await projectFor(db, ownerId, projectId))) throw new Error("not your project");
   const now = new Date();
   await db.update(projectKeys).set({ revokedAt: now }).where(and(eq(projectKeys.projectId, projectId), isNull(projectKeys.revokedAt)));
   const key = newProjectKey();
@@ -40,8 +41,10 @@ export async function keyInfo(db: Db, projectId: string): Promise<{ prefix: stri
   return k ?? null;
 }
 
-export async function setQuiet(db: Db, projectId: string, ms: number): Promise<void> {
+export async function setQuiet(db: Db, ownerId: string, projectId: string, ms: number): Promise<void> {
   if (!Number.isInteger(ms) || ms < 60_000) throw new Error("the quiet period must be at least one minute");
+  if (ms > 30 * 24 * 3_600_000) throw new Error("the quiet period must be at most thirty days");
+  if (!(await projectFor(db, ownerId, projectId))) throw new Error("not your project");
   await db.update(projects).set({ alertQuietMs: ms }).where(eq(projects.id, projectId));
 }
 
@@ -59,7 +62,7 @@ function row(f: FlagRecord): FlagRow {
 
 export type MonitorState = "never" | "ok" | "amber" | "red";
 export interface Dashboard {
-  monitor: { state: MonitorState; version: string | null; cursorSeq: number | null; lastHeartbeatAt: Date | null; intervalMs: number | null };
+  monitor: { state: MonitorState; version: string | null; cursorSeq: number | null; lastHeartbeatAt: Date | null; intervalMs: number | null; lastAlertAt: Date | null; lastAlertError: string | null };
   counts: { day: Record<string, number>; week: Record<string, number> };
   recent: FlagRow[];
 }
@@ -79,8 +82,8 @@ export async function dashboard(db: Db, projectId: string, now: Date = new Date(
   }
   const day = await countsSince(db, projectId, new Date(now.getTime() - 24 * 3_600_000));
   const week = await countsSince(db, projectId, new Date(now.getTime() - 7 * 24 * 3_600_000));
-  const recent = (await db.select().from(flags).where(eq(flags.projectId, projectId)).orderBy(desc(flags.receivedAt), desc(flags.id)).limit(50)).map(row);
-  return { monitor: { state, version: m?.version ?? null, cursorSeq: m?.cursorSeq ?? null, lastHeartbeatAt: m?.lastHeartbeatAt ?? null, intervalMs: m?.intervalMs ?? null }, counts: { day, week }, recent };
+  const recent = (await db.select().from(flags).where(eq(flags.projectId, projectId)).orderBy(desc(flags.receivedAt), desc(sql`(${flags.ref}->>'seq')::bigint`)).limit(50)).map(row);
+  return { monitor: { state, version: m?.version ?? null, cursorSeq: m?.cursorSeq ?? null, lastHeartbeatAt: m?.lastHeartbeatAt ?? null, intervalMs: m?.intervalMs ?? null, lastAlertAt: m?.lastAlertAt ?? null, lastAlertError: m?.lastAlertError ?? null }, counts: { day, week }, recent };
 }
 
 export async function flagFor(db: Db, projectId: string, flagId: string): Promise<FlagRecord | null> {
@@ -88,7 +91,8 @@ export async function flagFor(db: Db, projectId: string, flagId: string): Promis
   return f ?? null;
 }
 
-/** Sets acknowledgedAt once; a second call keeps the first time. */
-export async function acknowledge(db: Db, projectId: string, flagId: string, now: Date = new Date()): Promise<void> {
+/** Sets acknowledgedAt once for the owner's own flag; a second call keeps the first time, a stranger's call does nothing. */
+export async function acknowledge(db: Db, ownerId: string, projectId: string, flagId: string, now: Date = new Date()): Promise<void> {
+  if (!(await projectFor(db, ownerId, projectId))) return;
   await db.update(flags).set({ acknowledgedAt: now }).where(and(eq(flags.projectId, projectId), eq(flags.id, flagId), isNull(flags.acknowledgedAt)));
 }

@@ -31,6 +31,9 @@ export const monitors = pgTable("monitors", {
   lastHeartbeatAt: timestamp("last_heartbeat_at", { withTimezone: true }),
   lastPushAt: timestamp("last_push_at", { withTimezone: true }),
   lastFlagAt: timestamp("last_flag_at", { withTimezone: true }),
+  lastAlertAt: timestamp("last_alert_at", { withTimezone: true }),
+  /** The last alert delivery failure, cleared by the next successful send. */
+  lastAlertError: text("last_alert_error"),
 });
 
 export const flags = pgTable(
