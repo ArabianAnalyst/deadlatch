@@ -1580,3 +1580,34 @@ footer {
   font-family: var(--mono);
   white-space: nowrap;
 }
+
+/* app */
+.app .app-h2 { font-size: 1.1rem; color: var(--ink); margin: 32px 0 12px; }
+.app-card { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 18px 20px; margin: 0 0 16px; }
+.app-card p { color: var(--muted); margin: 8px 0 0; line-height: 1.6; }
+.app-form label { display: block; color: var(--muted); font-size: 0.9rem; margin: 0 0 12px; }
+.app-form input, .app-inline input { display: block; width: 100%; max-width: 420px; margin-top: 6px; padding: 9px 11px; background: var(--panel2); border: 1px solid var(--line2); border-radius: 8px; color: var(--ink); font: inherit; }
+.app-inline { display: flex; align-items: flex-end; gap: 12px; margin-top: 12px; }
+.app-inline label { color: var(--muted); font-size: 0.9rem; }
+.app-inline input { width: 120px; }
+.app-error { color: var(--deny); }
+.app-key pre, .app-pre { margin: 12px 0 0; padding: 12px 14px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; font-size: 0.86rem; line-height: 1.55; overflow-x: auto; color: var(--ink); }
+.app-key .btn { margin-top: 14px; }
+.app-status { display: flex; align-items: center; gap: 14px; }
+.app-status-label { color: var(--ink); font-weight: 600; }
+.app-dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; background: var(--faint); }
+.app-dot.ok { background: var(--allow); box-shadow: 0 0 0 4px var(--allow-bg); }
+.app-dot.amber { background: var(--hold); box-shadow: 0 0 0 4px var(--hold-bg); }
+.app-dot.red { background: var(--deny); box-shadow: 0 0 0 4px var(--deny-bg); }
+.app-muted { color: var(--faint); font-size: 0.86rem; }
+.app-links a { color: var(--allow); }
+.app-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.92rem; display: block; overflow-x: auto; }
+.app-table th, .app-table td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.app-table th { color: var(--faint); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+.app-table a { color: var(--allow); text-decoration: none; }
+.app-table tr.app-ack td { color: var(--faint); }
+.app-dl { display: grid; grid-template-columns: 80px 1fr; gap: 6px 12px; margin-top: 10px; }
+.app-dl dt { color: var(--faint); font-family: var(--mono); font-size: 0.8rem; }
+.app-dl dd { margin: 0; color: var(--ink); word-break: break-all; }
+.app-hash { font-size: 0.8rem; }
+.app-list { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.86rem; line-height: 1.7; }
