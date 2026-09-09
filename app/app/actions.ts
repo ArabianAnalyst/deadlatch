@@ -12,26 +12,27 @@ async function owner(): Promise<string> {
   return userId;
 }
 
-export interface KeyState { key: string | null; projectId: string | null; error: string | null }
+export interface KeyState { key: string | null; projectId: string | null; stream: string | null; error: string | null }
 
 export async function createProjectAction(_prev: KeyState, form: FormData): Promise<KeyState> {
   const ownerId = await owner();
   try {
     const { project, key } = await createProject(db, ownerId, String(form.get("name") ?? ""), String(form.get("stream") ?? "purse"));
     revalidatePath("/app");
-    return { key, projectId: project.id, error: null };
+    return { key, projectId: project.id, stream: project.stream, error: null };
   } catch (e) {
-    return { key: null, projectId: null, error: (e as Error).message };
+    return { key: null, projectId: null, stream: null, error: (e as Error).message };
   }
 }
 
 export async function rotateKeyAction(_prev: KeyState, form: FormData): Promise<KeyState> {
   const ownerId = await owner();
   const projectId = String(form.get("projectId") ?? "");
-  if (!(await projectFor(db, ownerId, projectId))) return { key: null, projectId: null, error: "not your project" };
+  const project = await projectFor(db, ownerId, projectId);
+  if (!project) return { key: null, projectId: null, stream: null, error: "not your project" };
   const { key } = await rotateKey(db, projectId);
   revalidatePath(`/app/${projectId}/settings`);
-  return { key, projectId, error: null };
+  return { key, projectId, stream: project.stream, error: null };
 }
 
 export async function acknowledgeAction(form: FormData): Promise<void> {

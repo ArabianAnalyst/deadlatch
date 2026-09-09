@@ -3,7 +3,7 @@ import { useActionState } from "react";
 import { createProjectAction, type KeyState } from "@/app/app/actions";
 import { configLines } from "@/lib/watch/config-lines";
 
-const initial: KeyState = { key: null, projectId: null, error: null };
+const initial: KeyState = { key: null, projectId: null, stream: null, error: null };
 
 export default function CreateProject({ origin }: { origin: string }) {
   const [state, action, pending] = useActionState(createProjectAction, initial);
@@ -12,7 +12,7 @@ export default function CreateProject({ origin }: { origin: string }) {
       <div className="app-card app-key">
         <div className="eyebrow">Your project key, shown once</div>
         <p>Copy these three lines into the broker's environment. The key is not stored anywhere in plain text and cannot be shown again. Rotate it from settings if you lose it.</p>
-        <pre className="mono">{configLines(state.key, "purse", origin)}</pre>
+        <pre className="mono">{configLines(state.key, state.stream ?? "purse", origin)}</pre>
         <a className="btn primary" href={`/app/${state.projectId}`}>Open the project</a>
       </div>
     );

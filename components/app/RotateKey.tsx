@@ -3,7 +3,7 @@ import { useActionState } from "react";
 import { rotateKeyAction, type KeyState } from "@/app/app/actions";
 import { configLines } from "@/lib/watch/config-lines";
 
-const initial: KeyState = { key: null, projectId: null, error: null };
+const initial: KeyState = { key: null, projectId: null, stream: null, error: null };
 
 export default function RotateKey({ projectId, stream, origin }: { projectId: string; stream: string; origin: string }) {
   const [state, action, pending] = useActionState(rotateKeyAction, initial);
