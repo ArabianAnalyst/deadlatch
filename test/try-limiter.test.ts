@@ -35,4 +35,11 @@ describe("take", () => {
     expect(keyFor("203.0.113.9")).not.toContain("203");
     expect(keyFor("203.0.113.9")).not.toBe(keyFor("203.0.113.10"));
   });
+  it("forty calls at once admit exactly thirty", async () => {
+    const t0 = new Date("2026-09-11T10:00:00.000Z");
+    const results = await Promise.all(Array.from({ length: 40 }, () => take(db, "k5", SPEND_LIMIT, t0)));
+    expect(results.filter((r) => r.ok)).toHaveLength(SPEND_LIMIT);
+    expect(results.filter((r) => !r.ok)).toHaveLength(10);
+    expect(await take(db, "k5", SPEND_LIMIT, new Date(t0.getTime() + WINDOW_MS))).toEqual({ ok: true, remaining: SPEND_LIMIT - 1 });
+  });
 });
