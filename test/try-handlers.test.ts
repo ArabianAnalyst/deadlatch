@@ -107,7 +107,7 @@ describe("reads", () => {
       lastAnchor: { seq: 27, head: HASH, at: "2026-09-11T00:05:00.000Z", logIndex: "101844748", logUrl: "https://log2025-1.rekor.sigstore.dev", logHost: "log2025-1.rekor.sigstore.dev" },
       verify: { ok: true, coveredUpTo: 27, reason: null },
       witnessKey: "WITKEY", logKey: "log2025-1.rekor.sigstore.dev=LOGKEY",
-      verifyCommand: `curl -s "https://b.test:8082/chain?format=jsonl&limit=500" > chain.jsonl\nnpx receipt-verify chain.jsonl --anchors https://b.test:8082 --log-key log2025-1.rekor.sigstore.dev=LOGKEY --witness-key WITKEY --stream playground`,
+      verifyCommand: `curl -s "https://b.test:8082/chain?format=jsonl&limit=500" > chain.jsonl\nnpx -p @olurabian/receipt receipt-verify chain.jsonl --anchors https://b.test:8082 --log-key log2025-1.rekor.sigstore.dev=LOGKEY --witness-key WITKEY --stream playground`,
     });
   });
   it("anchor survives a witness that is down", async () => {

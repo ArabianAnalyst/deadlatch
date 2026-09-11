@@ -112,7 +112,7 @@ export async function anchor(deps: TryDeps): Promise<Reply> {
     const chainRes = isObj(verify.chain) ? verify.chain : {};
     const base = deps.env.witnessUrl.replace(/\/+$/, "");
     const verifyCommand = witnessKey
-      ? `curl -s "${base}/chain?format=jsonl&limit=500" > chain.jsonl\nnpx receipt-verify chain.jsonl --anchors ${base} --log-key ${deps.env.logKey} --witness-key ${witnessKey} --stream ${stream}`
+      ? `curl -s "${base}/chain?format=jsonl&limit=500" > chain.jsonl\nnpx -p @olurabian/receipt receipt-verify chain.jsonl --anchors ${base} --log-key ${deps.env.logKey} --witness-key ${witnessKey} --stream ${stream}`
       : "The witness did not publish its key, so the verify command cannot be completed.";
     return {
       status: 200, cacheSec: 15,
