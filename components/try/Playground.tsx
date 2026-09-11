@@ -90,15 +90,32 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
   const seq = useRef(0);
   const busyRef = useRef(false);
   const mounted = useRef(true);
+  const totalRef = useRef(0);
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
-  const refreshProve = useCallback(async () => {
+  const refreshProve = useCallback(async (): Promise<ChainDoc> => {
     const [c, a] = await Promise.all([get<ChainDoc>("/api/try/chain"), get<AnchorDoc>("/api/try/anchor")]);
     setChain((prev) => (!c.error || !prev ? c : prev));
     setAnchor((prev) => (!a.error || !prev ? a : prev));
     setProveError(c.error ? plain(c.error) : a.error ? plain(a.error) : null);
+    if (typeof c.total === "number") totalRef.current = c.total;
+    return c;
   }, []);
+
+  /**
+   * The witness memoises its read for a few seconds, so a receipt written a moment ago can be missing from the
+   * very next read. Refresh until the chain grows past where it was, or give up after a bounded wait, so the
+   * visitor sees their own receipt rather than a stale tail.
+   */
+  const settleProve = useCallback(async (wasTotal: number) => {
+    for (let i = 0; i < 8; i++) {
+      const c = await refreshProve();
+      if (typeof c.total === "number" && c.total > wasTotal) return;
+      if (!mounted.current) return;
+      await wait(2000);
+    }
+  }, [refreshProve]);
   const refreshWatch = useCallback(async () => {
     const f = await get<FlagsDoc>("/api/try/flags");
     setFlags((prev) => (!f.error || !prev ? f : prev));
@@ -115,6 +132,7 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
   const patch = (key: number, p: Partial<Card>) => setCards((cs) => cs.map((c) => (c.key === key ? { ...c, ...p } : c)));
 
   const spend = useCallback(async (preset: Preset, label: string): Promise<boolean> => {
+    const wasTotal = totalRef.current;
     const key = push(label);
     const d = await post<Decision>("/api/try/request", { preset });
     patch(key, { decision: d });
@@ -127,7 +145,7 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
       grants.current.add(d.grantId);
       const x = await post<Executed>("/api/try/execute", { grantId: d.grantId });
       patch(key, { executed: x });
-      void refreshProve();
+      void settleProve(wasTotal);
       return x.status === "paid";
     }
     if (d.decision === "needs_approval" && d.pendingId) {
@@ -143,9 +161,9 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
         }
       })();
     }
-    void refreshProve();
+    void settleProve(wasTotal);
     return false;
-  }, [refreshProve]);
+  }, [refreshProve, settleProve]);
 
   const one = async (preset: Preset, label: string) => {
     if (busy || busyRef.current) return;
