@@ -13,3 +13,5 @@ What the dashboard shows. A heartbeat dot that goes amber after two intervals an
 The alert. One plain email per project per quiet period, six hours by default, on the first flag after silence, to the owner's sign-in address. The sender is Resend's onboarding address until deadlatch.dev is verified there, which is a DNS task for the owner.
 
 Running the tests. `npm test` runs everything against an in-process Postgres with the real migrations, so no database or key is needed. `npm run db:migrate` applies the migrations to the database in `DATABASE_URL`. Running the app needs `DATABASE_URL`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `RESEND_API_KEY`, with `ALERT_FROM` and `APP_ORIGIN` optional, all pulled from Vercel with `vercel env pull .env.local`.
+
+A project's key can also be minted from the command line with `npx tsx scripts/bootstrap-project.ts <clerk user id> "<name>" <stream> -- <command that reads the key on stdin>`, which pipes the plain key straight into that command's stdin. On Windows use `--fly <app>` instead of the shell hand-off, the key then goes straight to flyctl.
