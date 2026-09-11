@@ -13,6 +13,9 @@ const LIMITED = "Thirty spends per ten minutes per visitor.";
 const TAIL = 25;
 
 const isObj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x);
+const isAnchor = (x: unknown): x is AnchorDoc =>
+  isObj(x) && typeof x.seq === "number" && typeof x.head === "string" && typeof x.at === "string"
+  && isObj(x.entry) && typeof x.entry.logIndex === "string" && isObj(x.log) && typeof x.log.url === "string";
 
 function fail(e: unknown): Reply {
   if (e instanceof UpstreamError) return { status: e.status, body: e.body };
@@ -93,12 +96,15 @@ export async function anchor(deps: TryDeps): Promise<Reply> {
       witnessGet(deps.fetch, deps.env.witnessUrl, "/anchors?since=0"),
       witnessGet(deps.fetch, deps.env.witnessUrl, "/verify"),
     ]);
+    for (const r of [idx, c, an, v]) {
+      if (r.status !== 200 || !isObj(r.json)) throw new UpstreamError(502, { error: "witness unreachable" }, "witness");
+    }
     const index = isObj(idx.json) ? idx.json : {};
     const stream = String(index.stream ?? "playground");
     const witnessKey = isObj(index.witness) ? String(index.witness.publicKey ?? "") : "";
     const doc = isObj(c.json) ? (c.json as unknown as ChainDoc) : { total: 0, head: null };
-    const list = isObj(an.json) && Array.isArray(an.json.anchors) ? (an.json.anchors as AnchorDoc[]) : [];
-    const last = list.length ? list[list.length - 1]! : null;
+    const raw = isObj(an.json) && Array.isArray(an.json.anchors) ? an.json.anchors : [];
+    const last = raw.length && isAnchor(raw[raw.length - 1]) ? (raw[raw.length - 1] as AnchorDoc) : null;
     const verify = isObj(v.json) ? v.json : {};
     const chainRes = isObj(verify.chain) ? verify.chain : {};
     const base = deps.env.witnessUrl.replace(/\/+$/, "");

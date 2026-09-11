@@ -113,6 +113,16 @@ describe("reads", () => {
     const down = { ...deps, fetch: fakeFetch(() => { throw new TypeError("fetch failed"); }) };
     expect(await anchor(down)).toEqual({ status: 502, body: { error: "witness unreachable" } });
   });
+  it("anchor tolerates a malformed anchor element and reports no anchor", async () => {
+    const odd = { ...deps, fetch: fakeFetch((url, body) => (url.includes("/anchors") ? json({ stream: "playground", anchors: [{ seq: 3 }] }) : broker(url, body))) };
+    const r = await anchor(odd);
+    expect(r.status).toBe(200);
+    expect((r.body as { lastAnchor: unknown }).lastAnchor).toBeNull();
+  });
+  it("anchor answers 502 when the witness answers an error status", async () => {
+    const sick = { ...deps, fetch: fakeFetch((url, body) => (url.endsWith("/verify") ? json({ error: "boom" }, 500) : broker(url, body))) };
+    expect(await anchor(sick)).toEqual({ status: 502, body: { error: "witness unreachable" } });
+  });
   it("flags reads the designated project, cached three seconds", async () => {
     const r = await flags(deps);
     expect(r.status).toBe(200);
