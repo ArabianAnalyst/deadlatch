@@ -14,13 +14,13 @@ export function ipFrom(headers: Headers): string {
   return headers.get("x-real-ip") ?? headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 }
 
-/** A fresh response each time. A Response body is consumed once, so this must not be a shared constant. */
-export function notConfigured(): NextResponse {
-  return NextResponse.json({ error: "playground not configured" }, { status: 503 });
-}
-
 /** Turn a handler reply into a response, with the CDN cache header on cacheable reads. */
 export function reply(r: { status: number; body: unknown; cacheSec?: number }): NextResponse {
   const headers: Record<string, string> = r.cacheSec ? { "cache-control": `public, s-maxage=${r.cacheSec}, stale-while-revalidate=${r.cacheSec}` } : { "cache-control": "no-store" };
   return NextResponse.json(r.body, { status: r.status, headers });
+}
+
+/** A fresh response each time. A Response body is consumed once, so this must not be a shared constant. */
+export function notConfigured(): NextResponse {
+  return reply({ status: 503, body: { error: "playground not configured" } });
 }

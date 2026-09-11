@@ -30,6 +30,12 @@ describe("brokerPost", () => {
     const f = fakeFetch(() => new Response("<html>", { status: 200 }));
     await expect(brokerPost(f, "https://b.test", "/request", {})).rejects.toBeInstanceOf(UpstreamError);
   });
+  it("aborts after timeoutMs and reports the broker as unreachable", async () => {
+    const f = fakeFetch((_url, init) => new Promise((_resolve, reject) => {
+      init!.signal!.addEventListener("abort", () => reject(new Error("aborted")));
+    }));
+    await expect(brokerPost(f, "https://b.test", "/request", {}, 50)).rejects.toMatchObject({ status: 502, which: "broker", body: { error: "playground broker unreachable" } });
+  });
 });
 
 describe("witnessGet", () => {

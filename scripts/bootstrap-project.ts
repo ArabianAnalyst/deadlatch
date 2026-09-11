@@ -15,11 +15,12 @@ async function main() {
   const rest = flyAt >= 0 ? argv.filter((_, i) => i !== flyAt && i !== flyAt + 1) : argv;
   const [ownerId, name, stream = "purse", dashDash, ...cmd] = rest;
   if (!ownerId || !name || (flyAt >= 0 && !flyApp)) { console.error("usage: bootstrap-project <clerk user id> <name> [stream] [--fly <fly app>] [-- command]"); process.exit(2); }
+  const flyctl = process.env.FLYCTL ?? (spawnSync("flyctl", ["version"], { stdio: "ignore", shell: process.platform === "win32" }).status === 0 ? "flyctl" : join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".fly", "bin", process.platform === "win32" ? "flyctl.exe" : "flyctl"));
+  if (flyApp && spawnSync(flyctl, ["version"], { stdio: "ignore", shell: process.platform === "win32" }).status !== 0) { console.error(`flyctl not found (tried ${flyctl}); set FLYCTL to its path`); process.exit(2); }
   const { project, key } = await createProject(db, ownerId, name, stream);
   console.log(`project ${project.id} key prefix ${keyPrefix(key)}`);
   if (flyApp) {
-    const flyctl = join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".fly", "bin", process.platform === "win32" ? "flyctl.exe" : "flyctl");
-    const r = spawnSync(flyctl, ["secrets", "set", `DEADLATCH_PROJECT_KEY=${key}`, "-a", flyApp], { stdio: ["ignore", "inherit", "inherit"] });
+    const r = spawnSync(flyctl, ["secrets", "set", `DEADLATCH_PROJECT_KEY=${key}`, "-a", flyApp], { stdio: ["ignore", "inherit", "inherit"], shell: process.platform === "win32" });
     process.exit(r.status ?? 1);
   }
   if (dashDash === "--" && cmd.length > 0) {

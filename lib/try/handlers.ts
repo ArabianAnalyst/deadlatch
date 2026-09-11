@@ -69,7 +69,8 @@ interface ChainDoc { stream: string; total: number; head: { seq: number; hash: s
 
 async function tail(deps: TryDeps): Promise<ChainDoc> {
   const first = await witnessGet(deps.fetch, deps.env.witnessUrl, `/chain?since=0&limit=1`);
-  const total = isObj(first.json) && typeof first.json.total === "number" ? first.json.total : 0;
+  if (first.status !== 200 || !isObj(first.json)) throw new UpstreamError(502, { error: "witness unreachable" }, "witness");
+  const total = typeof first.json.total === "number" ? first.json.total : 0;
   const since = Math.max(0, total - TAIL);
   const r = await witnessGet(deps.fetch, deps.env.witnessUrl, `/chain?since=${since}&limit=${TAIL}`);
   if (r.status !== 200 || !isObj(r.json)) throw new UpstreamError(502, { error: "witness unreachable" }, "witness");
@@ -93,7 +94,7 @@ export async function anchor(deps: TryDeps): Promise<Reply> {
     const [idx, c, an, v] = await Promise.all([
       witnessGet(deps.fetch, deps.env.witnessUrl, "/"),
       witnessGet(deps.fetch, deps.env.witnessUrl, "/chain?since=0&limit=1"),
-      witnessGet(deps.fetch, deps.env.witnessUrl, "/anchors?since=0"),
+      witnessGet(deps.fetch, deps.env.witnessUrl, "/anchors?tail=1"),
       witnessGet(deps.fetch, deps.env.witnessUrl, "/verify"),
     ]);
     for (const r of [idx, c, an, v]) {
@@ -105,15 +106,19 @@ export async function anchor(deps: TryDeps): Promise<Reply> {
     const doc = isObj(c.json) ? (c.json as unknown as ChainDoc) : { total: 0, head: null };
     const raw = isObj(an.json) && Array.isArray(an.json.anchors) ? an.json.anchors : [];
     const last = raw.length && isAnchor(raw[raw.length - 1]) ? (raw[raw.length - 1] as AnchorDoc) : null;
+    let logHost: string | null = null;
+    if (last) { try { logHost = new URL(last.log.url).host; } catch { logHost = null; } }
     const verify = isObj(v.json) ? v.json : {};
     const chainRes = isObj(verify.chain) ? verify.chain : {};
     const base = deps.env.witnessUrl.replace(/\/+$/, "");
-    const verifyCommand = `curl -s "${base}/chain?format=jsonl&limit=500" > chain.jsonl\nnpx receipt-verify chain.jsonl --anchors ${base} --log-key ${deps.env.logKey} --witness-key ${witnessKey} --stream ${stream}`;
+    const verifyCommand = witnessKey
+      ? `curl -s "${base}/chain?format=jsonl&limit=500" > chain.jsonl\nnpx receipt-verify chain.jsonl --anchors ${base} --log-key ${deps.env.logKey} --witness-key ${witnessKey} --stream ${stream}`
+      : "The witness did not publish its key, so the verify command cannot be completed.";
     return {
       status: 200, cacheSec: 15,
       body: {
         stream, total: doc.total, head: doc.head,
-        lastAnchor: last ? { seq: last.seq, head: last.head, at: last.at, logIndex: last.entry.logIndex, logUrl: last.log.url } : null,
+        lastAnchor: last ? { seq: last.seq, head: last.head, at: last.at, logIndex: last.entry.logIndex, logUrl: last.log.url, logHost } : null,
         verify: { ok: verify.ok === true, coveredUpTo: typeof verify.coveredUpTo === "number" ? verify.coveredUpTo : null, reason: typeof chainRes.reason === "string" ? chainRes.reason : null },
         witnessKey, logKey: deps.env.logKey, verifyCommand,
       },
@@ -122,6 +127,8 @@ export async function anchor(deps: TryDeps): Promise<Reply> {
 }
 
 export async function flags(deps: TryDeps): Promise<Reply> {
-  const w = await publicWatch(deps.db, deps.env.projectId, deps.now?.());
-  return { status: 200, cacheSec: 3, body: w };
+  try {
+    const w = await publicWatch(deps.db, deps.env.projectId, deps.now?.());
+    return { status: 200, cacheSec: 3, body: w };
+  } catch { return { status: 502, body: { error: "flags unavailable" } }; }
 }

@@ -24,6 +24,7 @@ describe("publicWatch", () => {
     const w = await publicWatch(db, a.id, new Date(base.getTime() + 25_000));
     expect(w.monitor.state).toBe("ok");
     expect(w.monitor.cursorSeq).toBe(40);
+    expect(Object.keys(w.monitor).sort()).toEqual(["cursorSeq", "state"]);
     expect(w.flags).toHaveLength(10);
     expect(w.flags[0]!.ref.seq).toBe(11);
     expect(w.flags.every((f) => f.id.startsWith("a-"))).toBe(true);
@@ -31,6 +32,6 @@ describe("publicWatch", () => {
   });
   it("answers never and an empty list for a project with nothing", async () => {
     const p = await seed("user_c", "c", 0, new Date());
-    expect(await publicWatch(db, p.id)).toEqual({ monitor: { state: "never", version: null, cursorSeq: null, lastHeartbeatAt: null, intervalMs: null, lastAlertAt: null, lastAlertError: null }, flags: [] });
+    expect(await publicWatch(db, p.id)).toEqual({ monitor: { state: "never", cursorSeq: null }, flags: [] });
   });
 });

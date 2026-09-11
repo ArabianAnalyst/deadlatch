@@ -3,6 +3,7 @@ import { testDb } from "@/lib/db/test";
 import { projects } from "@/lib/db/schema";
 import { request, execute, status, chain, anchor, flags, type TryDeps } from "@/lib/try/handlers";
 import { SPEND_LIMIT } from "@/lib/try/limiter";
+import type { Db } from "@/lib/db/types";
 
 type Route = (url: string, body?: unknown) => Response | never;
 function fakeFetch(route: Route): typeof fetch {
@@ -103,7 +104,7 @@ describe("reads", () => {
     expect(r.cacheSec).toBe(15);
     expect(r.body).toEqual({
       stream: "playground", total: 30, head: { seq: 29, hash: HASH },
-      lastAnchor: { seq: 27, head: HASH, at: "2026-09-11T00:05:00.000Z", logIndex: "101844748", logUrl: "https://log2025-1.rekor.sigstore.dev" },
+      lastAnchor: { seq: 27, head: HASH, at: "2026-09-11T00:05:00.000Z", logIndex: "101844748", logUrl: "https://log2025-1.rekor.sigstore.dev", logHost: "log2025-1.rekor.sigstore.dev" },
       verify: { ok: true, coveredUpTo: 27, reason: null },
       witnessKey: "WITKEY", logKey: "log2025-1.rekor.sigstore.dev=LOGKEY",
       verifyCommand: `curl -s "https://b.test:8082/chain?format=jsonl&limit=500" > chain.jsonl\nnpx receipt-verify chain.jsonl --anchors https://b.test:8082 --log-key log2025-1.rekor.sigstore.dev=LOGKEY --witness-key WITKEY --stream playground`,
@@ -128,5 +129,23 @@ describe("reads", () => {
     expect(r.status).toBe(200);
     expect(r.cacheSec).toBe(3);
     expect(r.body).toMatchObject({ monitor: { state: "never" }, flags: [] });
+  });
+  it("flags answers 502 when the database read fails", async () => {
+    const broken = { ...deps, db: { select() { throw new Error("db down"); } } as unknown as Db };
+    expect(await flags(broken)).toEqual({ status: 502, body: { error: "flags unavailable" } });
+  });
+  it("chain against an empty stream returns no head and no records", async () => {
+    const empty = { ...deps, fetch: fakeFetch((url) => (url.includes("/chain") ? json({ stream: "playground", total: 0, head: null, since: 0, count: 0, records: [] }) : json({ error: "not found" }, 404))) };
+    const r = await chain(empty);
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ total: 0, head: null, records: [] });
+  });
+  it("anchor gives a plain verify-command message when the witness has not published a key", async () => {
+    const noKey = { ...deps, fetch: fakeFetch((url, body) => (url.endsWith(":8082/") ? json({ stream: "playground", witness: {}, log: { url: "https://log2025-1.rekor.sigstore.dev", keyId: "kid" } }) : broker(url, body))) };
+    const r = await anchor(noKey);
+    expect(r.status).toBe(200);
+    const b = r.body as { witnessKey: string; verifyCommand: string };
+    expect(b.witnessKey).toBe("");
+    expect(b.verifyCommand).toBe("The witness did not publish its key, so the verify command cannot be completed.");
   });
 });

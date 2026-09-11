@@ -9,9 +9,9 @@ export class UpstreamError extends Error {
 
 const DOWN = { broker: { error: "playground broker unreachable" }, witness: { error: "witness unreachable" } } as const;
 
-async function call(fetchImpl: typeof fetch, which: "broker" | "witness", url: string, init: RequestInit): Promise<{ status: number; json: unknown }> {
+async function call(fetchImpl: typeof fetch, which: "broker" | "witness", url: string, init: RequestInit, timeoutMs: number = TIMEOUT_MS): Promise<{ status: number; json: unknown }> {
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
   let res: Response;
   try {
     res = await fetchImpl(url, { ...init, signal: ctl.signal });
@@ -32,11 +32,11 @@ async function call(fetchImpl: typeof fetch, which: "broker" | "witness", url: s
 const base = (u: string) => u.replace(/\/+$/, "");
 
 /** POST a JSON body to the broker's agent port. Upstream statuses are returned as-is; only unreachability throws. */
-export function brokerPost(fetchImpl: typeof fetch, brokerUrl: string, path: "/request" | "/execute" | "/status", body: object) {
-  return call(fetchImpl, "broker", `${base(brokerUrl)}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+export function brokerPost(fetchImpl: typeof fetch, brokerUrl: string, path: "/request" | "/execute" | "/status", body: object, timeoutMs: number = TIMEOUT_MS) {
+  return call(fetchImpl, "broker", `${base(brokerUrl)}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }, timeoutMs);
 }
 
 /** GET a JSON document from the witness port. */
-export function witnessGet(fetchImpl: typeof fetch, witnessUrl: string, pathWithQuery: string) {
-  return call(fetchImpl, "witness", `${base(witnessUrl)}${pathWithQuery}`, { method: "GET" });
+export function witnessGet(fetchImpl: typeof fetch, witnessUrl: string, pathWithQuery: string, timeoutMs: number = TIMEOUT_MS) {
+  return call(fetchImpl, "witness", `${base(witnessUrl)}${pathWithQuery}`, { method: "GET" }, timeoutMs);
 }
