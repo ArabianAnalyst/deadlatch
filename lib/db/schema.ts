@@ -65,3 +65,10 @@ export const alerts = pgTable(
   },
   (t) => [primaryKey({ columns: [t.projectId, t.flagId] }), uniqueIndex("alerts_project_bucket").on(t.projectId, t.bucket), index("alerts_project_sent").on(t.projectId, t.sentAt)],
 );
+
+/** One row per visitor bucket for the playground's rate limit. The key is a hash, the ip is never stored. */
+export const tryLimits = pgTable("try_limits", {
+  key: text("key").primaryKey(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  count: integer("count").notNull(),
+});
