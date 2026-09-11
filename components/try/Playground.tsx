@@ -165,9 +165,12 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
         if (!ok) { setWatchNote("The run stopped early, see the last card."); return; }
         if (i < 5) await wait(1000);
       }
-      const started = Date.now();
       busyRef.current = false;
       setBusy(false);
+      const seen = await get<FlagsDoc>("/api/try/flags");
+      if (!seen.error) setFlags((prev) => (seen.error && prev ? prev : seen));
+      const known = new Set((seen.flags ?? []).map((f) => f.id));
+      const started = Date.now();
       setWatchNote("Watching for the flag. The monitor reads the chain every fifteen seconds.");
       for (let t = 0; t < 18; t++) {
         await wait(5000);
@@ -175,7 +178,7 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
         const doc = await get<FlagsDoc>("/api/try/flags");
         setFlags((prev) => (!doc.error || !prev ? doc : prev));
         setWatchError(doc.error ? plain(doc.error) : null);
-        const fresh = (doc.flags ?? []).find((f) => Date.parse(f.at) >= started - 2000);
+        const fresh = (doc.flags ?? []).find((f) => !known.has(f.id));
         if (fresh) { setWatchNote(`Flagged ${Math.round((Date.now() - started) / 1000)} seconds after the fifth spend.`); return; }
       }
       setWatchNote("No flag inside ninety seconds. The monitor may be behind, the panel keeps the last state it had.");
