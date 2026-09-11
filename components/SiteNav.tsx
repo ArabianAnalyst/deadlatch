@@ -23,6 +23,7 @@ export default function SiteNav() {
           <a href="/#why">Why open</a>
           <a href="/#audit">Audit</a>
           <Link href="/log">Log</Link>
+          <Link href="/try">Try</Link>
           <Link href="/app">App</Link>
         </div>
         <div className="nav-right">

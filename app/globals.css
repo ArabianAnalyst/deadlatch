@@ -1613,3 +1613,26 @@ footer {
 .app-dl dd { margin: 0; color: var(--ink); word-break: break-all; }
 .app-hash { font-size: 0.8rem; }
 .app-list { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.86rem; line-height: 1.7; }
+/* try */
+.try .try-strip { color: var(--muted); border-left: 3px solid var(--hold); padding: 6px 0 6px 14px; margin: 12px 0 0; max-width: 72ch; }
+.try-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 20px; }
+@media (min-width: 1100px) { .try-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.try-panel { min-width: 0; }
+.try-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+.try-buttons .btn:disabled { opacity: 0.5; cursor: default; }
+.try-cards, .try-recs, .try-flags { display: flex; flex-direction: column; gap: 10px; }
+.try-card, .try-rec, .try-flag { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--ground); }
+.try-rec.mine { border-color: var(--allow-ln); box-shadow: 0 0 0 3px var(--allow-bg); }
+.try-card-hd, .try-rec-hd { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.try-card p, .try-rec p, .try-flag p { margin: 6px 0 0; font-size: 0.86rem; line-height: 1.5; overflow-wrap: anywhere; }
+.try-chip { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.try-chip.allowed { color: var(--allow); border-color: var(--allow-ln); background: var(--allow-bg); }
+.try-chip.held { color: var(--hold); border-color: var(--hold-ln); background: var(--hold-bg); }
+.try-chip.denied { color: var(--deny); border-color: var(--deny-ln); background: var(--deny-bg); }
+.try-kind { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; }
+.try-mine { color: var(--allow); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.try-note { color: var(--hold); font-size: 0.86rem; margin: 8px 0 0; }
+.try-curl summary { cursor: pointer; color: var(--faint); font-size: 0.78rem; margin-top: 6px; }
+.try-curl pre { margin: 6px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: 0.76rem; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.try-anchor { margin: 10px 0 14px; }
+.try-cta { margin-top: 16px; }
