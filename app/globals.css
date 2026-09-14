@@ -1636,3 +1636,14 @@ footer {
 .try-curl pre { margin: 6px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: 0.76rem; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
 .try-anchor { margin: 10px 0 14px; }
 .try-cta { margin-top: 16px; }
+
+/* proof */
+.proof { padding-top: 0; padding-bottom: 8px; }
+.proof-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 18px 20px; }
+.proof-cell { min-width: 0; }
+.proof-n { font-family: var(--mono); font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); overflow-wrap: anywhere; }
+.proof-l { color: var(--muted); font-size: 0.86rem; margin-top: 4px; line-height: 1.5; overflow-wrap: anywhere; }
+.proof-line { color: var(--muted); font-size: 0.95rem; margin: 14px 0 0; }
+.proof-line a { color: var(--allow); text-decoration: none; }
+.proof-line a:hover { color: var(--ink); }
+@media (max-width: 760px) { .proof-grid { grid-template-columns: 1fr; gap: 16px; } }
