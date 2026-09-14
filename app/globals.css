@@ -1138,8 +1138,6 @@ a.signal:hover {
   font-weight: 500;
 }
 
-/* BAND */
-
 /* LOG (blog) */
 .logwrap {
   max-width: 760px;
@@ -1585,7 +1583,7 @@ footer {
 .try-cta { margin-top: 16px; }
 
 /* proof */
-.proof { padding-top: 0; padding-bottom: 8px; }
+.proof { padding-top: 0; padding-bottom: 8px; border-top: 0; }
 .proof-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 18px 20px; }
 .proof-cell { min-width: 0; }
 .proof-n { font-family: var(--mono); font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); overflow-wrap: anywhere; }
@@ -1599,7 +1597,6 @@ footer {
 .nav-menu-btn { display: none; font-family: var(--mono); font-size: 0.8rem; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
 .nav-menu-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .nav-menu { display: none; border-top: 1px solid var(--line); background: var(--panel); }
-.nav-menu[hidden] { display: none; }
 .nav-menu-in { display: flex; flex-direction: column; padding: 6px 0 14px; }
 .nav-menu-in a { padding: 12px 0; color: var(--ink); font-size: 1rem; text-decoration: none; border-bottom: 1px solid var(--line); }
 .nav-menu-in a:last-child { border-bottom: 0; }
@@ -1611,4 +1608,3 @@ footer {
 /* footer closing line */
 .foot-close { width: 100%; font-family: var(--mono); font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
 .foot-close em { font-style: normal; color: var(--allow); text-transform: none; letter-spacing: 0; }
-.why h2.big { margin: 0; }

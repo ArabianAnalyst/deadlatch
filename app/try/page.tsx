@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Playground from "@/components/try/Playground";
 
 export const metadata: Metadata = {
-  title: "Try it — Deadlatch",
+  title: "Try it · Deadlatch",
   description: "Route a spend through a real broker, watch it decide, see the chained receipt and its anchored head, and trip a flag. Mock rail, nothing settles. Thirty seconds, no sign-up.",
 };
 export const dynamic = "force-dynamic";

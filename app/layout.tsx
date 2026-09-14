@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.deadlatch.dev"),
-  title: "Deadlatch — Runtime governance for AI agents",
+  title: "Deadlatch · Runtime governance for AI agents",
   description:
     "The open runtime governance stack for AI agents. Enforce what an agent can do, prove what it did, and watch for what slipped through. Purse, blackbox, Tripwire. Open, composable, verifiable.",
   keywords: [
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Oluwasegun Araba", url: "https://olurabian.com" }],
   openGraph: {
-    title: "Deadlatch — Runtime governance for AI agents",
+    title: "Deadlatch · Runtime governance for AI agents",
     description:
       "Enforce what an agent can do, prove what it did, and watch for what slipped through. Open, composable, verifiable.",
     url: "https://www.deadlatch.dev",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deadlatch — Runtime governance for AI agents",
+    title: "Deadlatch · Runtime governance for AI agents",
     description:
       "The open runtime governance stack for AI agents. Enforce, prove, watch.",
     creator: "@Olurabian",
