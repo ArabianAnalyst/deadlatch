@@ -57,6 +57,7 @@ export default function Console() {
   const started = useRef(false); // begin() has been scheduled once
   const primed = useRef(false); // the first fire has completed
   const visible = useRef(false); // at least 40 percent in view, per the observer's latest entry
+  const dead = useRef(false);
   const ticks = useRef(0);
   const [tickCount, setTickCount] = useState(0);
 
@@ -163,6 +164,7 @@ export default function Console() {
         cancelIdle = null;
         void (async () => {
           await fire(STREAM[0]!);
+          if (dead.current) return;
           idxRef.current = 1;
           primed.current = true;
           if (visible.current && !reduced.current && !userPaused.current) start();
@@ -173,6 +175,7 @@ export default function Console() {
     const io = new IntersectionObserver(
       (entries) => {
         const e = entries[entries.length - 1]!;
+        // 0.4 is both the start and the pause threshold on purpose, one line to reason about.
         visible.current = e.isIntersecting && e.intersectionRatio >= 0.4;
         if (visible.current) {
           if (!started.current) begin();
@@ -186,6 +189,8 @@ export default function Console() {
     );
     io.observe(el);
     return () => {
+      dead.current = true;
+      visible.current = false;
       io.disconnect();
       if (cancelIdle) cancelIdle();
       if (timer.current) clearInterval(timer.current);

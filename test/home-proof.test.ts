@@ -21,7 +21,7 @@ describe("homeProof", () => {
     const p = await homeProof({ db, fetch: fakeFetch(witness), env });
     expect(p).toEqual({ total: 1204, lastAnchor: { seq: 27, logIndex: "105663672", at: "2026-09-14T10:00:00.000Z", logHost: "log2025-1.rekor.sigstore.dev" } });
   });
-  it("is null with no anchor yet, and keeps the total", async () => {
+  it("keeps the total when there is no anchor yet", async () => {
     const f = fakeFetch((u) => (u.includes("/anchors") ? json({ stream: "playground", anchors: [] }) : witness(u)));
     expect(await homeProof({ db, fetch: f, env })).toEqual({ total: 1204, lastAnchor: null });
   });
@@ -45,5 +45,7 @@ describe("formatting", () => {
     expect(minutesAgo("2026-09-14T09:30:00.000Z", now)).toBe("1 hour ago");
     expect(minutesAgo("2026-09-14T07:00:00.000Z", now)).toBe("4 hours ago");
     expect(minutesAgo("2026-09-14T11:00:00.000Z", now)).toBe("under a minute ago");
+    expect(minutesAgo("2026-09-13T10:00:00.000Z", now)).toBe("1 day ago");
+    expect(minutesAgo("2026-09-11T21:00:00.000Z", now)).toBe("2 days ago");
   });
 });

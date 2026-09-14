@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { fmtInt, minutesAgo, type HomeProof } from "@/lib/home/proof";
+import type { HomeProof } from "@/lib/home/proof";
+import { fmtInt, minutesAgo } from "@/lib/home/format";
 
 /**
  * Every anchor on the playground chain carried three cosigning witnesses when the verifier ran on 2026-09-11.
@@ -28,7 +29,7 @@ export default function ProofBand({ proof }: { proof: HomeProof | null }) {
           ) : (
             <>
               <div className="proof-n">first anchor pending</div>
-              <div className="proof-l">the witness anchors every five minutes</div>
+              <div className="proof-l">anchored within five minutes of the next receipt</div>
             </>
           )}
         </div>
