@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 function Lock() {
   return (
@@ -10,7 +13,42 @@ function Lock() {
   );
 }
 
+type NavLink = { href: string; label: string; anchor?: boolean; prefetch?: false };
+
+/** The App link is never prefetched. Prefetching it follows a redirect into the sign-in host and logs a cross-origin error on every page. */
+const LINKS: NavLink[] = [
+  { href: "/try", label: "Try" },
+  { href: "/#stack", label: "Stack", anchor: true },
+  { href: "/#why", label: "Why open", anchor: true },
+  { href: "/audit", label: "Audit" },
+  { href: "/log", label: "Log" },
+  { href: "/app", label: "App", prefetch: false },
+];
+
 export default function SiteNav() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const items = LINKS.map((l) =>
+    l.anchor ? (
+      <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
+        {l.label}
+      </a>
+    ) : (
+      <Link key={l.href} href={l.href} prefetch={l.prefetch} onClick={() => setOpen(false)}>
+        {l.label}
+      </Link>
+    ),
+  );
+
   return (
     <nav>
       <div className="wrap nav-in">
@@ -18,14 +56,7 @@ export default function SiteNav() {
           <Lock />
           deadlatch
         </Link>
-        <div className="nav-links">
-          <a href="/#stack">Stack</a>
-          <a href="/#why">Why open</a>
-          <a href="/#audit">Audit</a>
-          <Link href="/log">Log</Link>
-          <Link href="/try">Try</Link>
-          <Link href="/app">App</Link>
-        </div>
+        <div className="nav-links">{items}</div>
         <div className="nav-right">
           <a className="npm" href="https://www.npmjs.com/package/@olurabian/purse">
             npm i <b>@olurabian/purse</b>
@@ -33,7 +64,19 @@ export default function SiteNav() {
           <a className="ghlink" href="https://github.com/ArabianAnalyst">
             GitHub ↗
           </a>
+          <button
+            className="nav-menu-btn"
+            type="button"
+            aria-expanded={open}
+            aria-controls="nav-menu"
+            onClick={() => setOpen((o) => !o)}
+          >
+            {open ? "Close" : "Menu"}
+          </button>
         </div>
+      </div>
+      <div id="nav-menu" className="nav-menu" hidden={!open}>
+        <div className="wrap nav-menu-in">{items}</div>
       </div>
     </nav>
   );

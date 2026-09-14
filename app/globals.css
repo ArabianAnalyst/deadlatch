@@ -1647,3 +1647,16 @@ footer {
 .proof-line a { color: var(--allow); text-decoration: none; }
 .proof-line a:hover { color: var(--ink); }
 @media (max-width: 760px) { .proof-grid { grid-template-columns: 1fr; gap: 16px; } }
+
+/* nav menu */
+.nav-menu-btn { display: none; font-family: var(--mono); font-size: 0.8rem; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.nav-menu-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.nav-menu { display: none; border-top: 1px solid var(--line); background: var(--panel); }
+.nav-menu[hidden] { display: none; }
+.nav-menu-in { display: flex; flex-direction: column; padding: 6px 0 14px; }
+.nav-menu-in a { padding: 12px 0; color: var(--ink); font-size: 1rem; text-decoration: none; border-bottom: 1px solid var(--line); }
+.nav-menu-in a:last-child { border-bottom: 0; }
+@media (max-width: 900px) {
+  .nav-menu-btn { display: inline-block; }
+  .nav-menu:not([hidden]) { display: block; }
+}
