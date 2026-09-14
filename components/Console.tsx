@@ -138,6 +138,7 @@ export default function Console() {
   }, [fire, resetDay]);
 
   useEffect(() => {
+    dead.current = false; // Strict Mode runs cleanup once before the real mount; each setup starts alive.
     reduced.current =
       typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const el = rootRef.current;
