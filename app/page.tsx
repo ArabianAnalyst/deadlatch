@@ -9,7 +9,7 @@ import { homeProof } from "@/lib/home/proof";
 export const revalidate = 60;
 
 /** Updated by hand when The Stack changes. */
-const SHIPS = 25;
+const SHIPS = 26;
 
 const REPO = {
   purse: "https://github.com/ArabianAnalyst/purse",
