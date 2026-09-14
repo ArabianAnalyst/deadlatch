@@ -110,3 +110,10 @@ export async function verifyChain(chain: ChainEntry[]): Promise<VerifyResult> {
   }
   return { ok: true };
 }
+
+/** One entry checked against the entry before it, without re-hashing the rest of the chain. */
+export async function verifyAppended(prev: ChainEntry | undefined, entry: ChainEntry): Promise<boolean> {
+  const expectedPrev = prev ? prev.hash : GENESIS;
+  if (entry.prev !== expectedPrev) return false;
+  return (await sha256(entry.prev + JSON.stringify(entry.record))) === entry.hash;
+}

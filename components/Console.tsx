@@ -10,6 +10,7 @@ import {
   evaluate,
   formatUsd,
   POLICY,
+  verifyAppended,
   verifyChain,
 } from "@/lib/engine";
 
@@ -51,6 +52,11 @@ export default function Console() {
   const idxRef = useRef(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const reduced = useRef(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const userPaused = useRef(false);
+  const started = useRef(false);
+  const ticks = useRef(0);
+  const [tickCount, setTickCount] = useState(0);
 
   const fire = useCallback(async (a: Action) => {
     const d = evaluate(a, spentRef.current);
@@ -61,15 +67,19 @@ export default function Console() {
       spentRef.current += a.amountCents;
       setSpent(spentRef.current);
     }
+    const prevEntry = chainRef.current[chainRef.current.length - 1];
     const entry = await appendRecord(chainRef.current, {
       amountCents: a.amountCents,
       payee: a.payee,
       verdict: d.verdict,
     });
+    const okAppend = await verifyAppended(prevEntry, entry);
     chainRef.current = [...chainRef.current, entry];
     setChain(chainRef.current);
-    const v = await verifyChain(chainRef.current);
-    setBrokenFrom(v.ok ? null : v.brokenAt ?? null);
+    // A tampered chain stays reported as broken until reset. A clean append never clears an earlier break.
+    setBrokenFrom((cur) => (cur !== null ? cur : okAppend ? null : entry.seq));
+    ticks.current += 1;
+    setTickCount(ticks.current);
     if (d.verdict !== "allow") {
       caughtRef.current = [...caughtRef.current, { amountCents: a.amountCents, reason: d.reason, verdict: d.verdict }];
       setCaught(caughtRef.current);
@@ -126,15 +136,42 @@ export default function Console() {
 
   useEffect(() => {
     reduced.current =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    void (async () => {
-      await fire(STREAM[0]!);
-      idxRef.current = 1;
-      if (!reduced.current) start();
-      else setRunning(false);
-    })();
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const el = rootRef.current;
+    if (!el) return;
+    const idle = (cb: () => void) => {
+      const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(cb, { timeout: 1500 });
+      else setTimeout(cb, 300);
+    };
+    const begin = () => {
+      if (started.current) return;
+      started.current = true;
+      idle(() => {
+        void (async () => {
+          await fire(STREAM[0]!);
+          idxRef.current = 1;
+          if (!reduced.current && !userPaused.current) start();
+          else setRunning(false);
+        })();
+      });
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.some((e) => e.isIntersecting && e.intersectionRatio >= 0.4);
+        if (visible) {
+          if (!started.current) begin();
+          else if (!userPaused.current && !reduced.current && !timer.current) start();
+        } else if (timer.current) {
+          clearInterval(timer.current);
+          timer.current = null;
+        }
+      },
+      { threshold: [0, 0.4] },
+    );
+    io.observe(el);
     return () => {
+      io.disconnect();
       if (timer.current) clearInterval(timer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,7 +184,7 @@ export default function Console() {
     decision.verdict === "allow" ? "var(--allow-bg)" : decision.verdict === "hold" ? "var(--hold-bg)" : "var(--deny-bg)";
 
   return (
-    <div className="console" aria-label="Live Deadlatch decision console">
+    <div className="console" ref={rootRef} data-ticks={tickCount} aria-label="Live Deadlatch decision console">
       <div className="c-bar">
         <span className="dot live" aria-hidden="true" />
         <span className="title">DEADLATCH</span>
@@ -201,7 +238,18 @@ export default function Console() {
           <button className="r" onClick={() => void fire(MANUAL.deny!)}>
             spend $30 &#183; off&#8209;policy
           </button>
-          <button className="auto" onClick={() => (running ? stop() : start())}>
+          <button
+            className="auto"
+            onClick={() => {
+              if (running) {
+                userPaused.current = true;
+                stop();
+              } else {
+                userPaused.current = false;
+                start();
+              }
+            }}
+          >
             {running ? "❙❙ pause" : "▶ resume"}
           </button>
         </div>
