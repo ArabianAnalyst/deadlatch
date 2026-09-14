@@ -125,3 +125,42 @@ buyer or an auditor needs.
 | Words | 953 | about 650 |
 
 Desktop stays at or above its current numbers.
+
+## After, measured 2026-09-14 on main 137b5fc
+
+Same method as above, Lighthouse 12, Chrome 147 headless, against the deployed site. Mobile was run twice because
+Lighthouse mobile varies run to run.
+
+| | Mobile, run 1 | Mobile, run 2 | Desktop | Target |
+|---|---|---|---|---|
+| Performance | 94 | 96 | 99 | 90 or better |
+| Accessibility | 100 | 100 | 100 | 100 |
+| Best practices | 100 | 100 | 100 | 100 |
+| SEO | 100 | 100 | 100 | 100 |
+| Largest Contentful Paint | 2.8 s | 2.7 s | 0.6 s | under 2.5 s |
+| Total Blocking Time | 150 ms | 80 ms | 0 ms | under 200 ms |
+| Cumulative Layout Shift | 0 | 0 | 0 | under 0.05 |
+| Total transfer | 307 KiB | 307 KiB | 384 KiB | under 400 KiB |
+| Console errors | 0 | 0 | 0 | 0 |
+
+Every target met except mobile LCP, which misses by 0.2 to 0.3 s. The element is still the `<h1>`. The breakdown on
+run 2 was 931 ms to first byte and 1,800 ms of render delay under simulated 4G, with no load delay and no load time,
+so the remaining cost is the render-blocking path (the stylesheet and the font) rather than bytes or script. That is
+the next lever, and it was not in this release's scope.
+
+### Words
+
+The 953 above was the whole rendered route. Measured the same way after, the route is 923, because the route also
+carries the nav (twice, one set per breakpoint), the console's labels, the proof band's live numbers and about 93
+words of hidden screen-reader text the flow diagram's library renders. Measured on the page's own copy with one
+method on both versions, the copy went from 798 words to 655.
+
+### Behaviour gates on the live site
+
+- Console ticks, viewport set before navigation. 390 × 844: 0 before scrolling into view, 3 after. 360 × 640: 0 and 3.
+  Desktop 1440 × 900, where the console is in view at load: 3.
+- Phone menu at 390: Try, Stack, Why open, Audit, Log, App; Escape closes it. Desktop bar: the same six.
+- Proof band, live: 51 receipts on the playground chain, seq 50 anchored in log2025-1.rekor.sigstore.dev, entry
+  106332328, 2 days ago, 3 witnesses. Its top border is 0, so the section hairline no longer doubles the panel border.
+- No horizontal overflow at 360. Console log on load: zero messages, no `accounts.dev` error.
+- Screenshots in Downloads, `deadlatch-home-after.png` and `deadlatch-home-after-mobile.png`.
