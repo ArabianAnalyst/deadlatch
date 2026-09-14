@@ -54,7 +54,9 @@ export default function Console() {
   const reduced = useRef(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const userPaused = useRef(false);
-  const started = useRef(false);
+  const started = useRef(false); // begin() has been scheduled once
+  const primed = useRef(false); // the first fire has completed
+  const visible = useRef(false); // at least 40 percent in view, per the observer's latest entry
   const ticks = useRef(0);
   const [tickCount, setTickCount] = useState(0);
 
@@ -139,29 +141,42 @@ export default function Console() {
       typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const el = rootRef.current;
     if (!el) return;
+    let cancelIdle: (() => void) | null = null;
     const idle = (cb: () => void) => {
-      const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
-      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(cb, { timeout: 1500 });
-      else setTimeout(cb, 300);
+      const w = window as Window & {
+        requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+      if (typeof w.requestIdleCallback === "function") {
+        const id = w.requestIdleCallback(cb, { timeout: 1500 });
+        cancelIdle = () => w.cancelIdleCallback?.(id);
+      } else {
+        const id = setTimeout(cb, 300);
+        cancelIdle = () => clearTimeout(id);
+      }
     };
+    // The one fire the console gets once it has been seen. The interval after it runs only while the console is in view.
     const begin = () => {
       if (started.current) return;
       started.current = true;
       idle(() => {
+        cancelIdle = null;
         void (async () => {
           await fire(STREAM[0]!);
           idxRef.current = 1;
-          if (!reduced.current && !userPaused.current) start();
+          primed.current = true;
+          if (visible.current && !reduced.current && !userPaused.current) start();
           else setRunning(false);
         })();
       });
     };
     const io = new IntersectionObserver(
       (entries) => {
-        const visible = entries.some((e) => e.isIntersecting && e.intersectionRatio >= 0.4);
-        if (visible) {
+        const e = entries[entries.length - 1]!;
+        visible.current = e.isIntersecting && e.intersectionRatio >= 0.4;
+        if (visible.current) {
           if (!started.current) begin();
-          else if (!userPaused.current && !reduced.current && !timer.current) start();
+          else if (primed.current && !userPaused.current && !reduced.current && !timer.current) start();
         } else if (timer.current) {
           clearInterval(timer.current);
           timer.current = null;
@@ -172,6 +187,7 @@ export default function Console() {
     io.observe(el);
     return () => {
       io.disconnect();
+      if (cancelIdle) cancelIdle();
       if (timer.current) clearInterval(timer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
