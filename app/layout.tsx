@@ -1,8 +1,36 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import localFont from "next/font/local";
 import SiteNav from "@/components/SiteNav";
 import "./globals.css";
+
+// Local copies of geist's own font files, so we control preload: Sans is the headline
+// font and preloads, Mono is off the critical path and does not.
+const GeistSans = localFont({
+  src: "./fonts/Geist-Variable.woff2",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+  display: "swap",
+  preload: true,
+});
+const GeistMono = localFont({
+  src: "./fonts/GeistMono-Variable.woff2",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+  fallback: [
+    "ui-monospace",
+    "SFMono-Regular",
+    "Roboto Mono",
+    "Menlo",
+    "Monaco",
+    "Liberation Mono",
+    "DejaVu Sans Mono",
+    "Courier New",
+    "monospace",
+  ],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.deadlatch.dev"),
