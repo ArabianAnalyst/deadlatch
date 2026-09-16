@@ -1608,3 +1608,6 @@ footer {
 /* footer closing line */
 .foot-close { width: 100%; font-family: var(--mono); font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
 .foot-close em { font-style: normal; color: var(--allow); text-transform: none; letter-spacing: 0; }
+
+/* sign-in */
+.signin-wrap { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px; }
