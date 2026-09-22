@@ -26,7 +26,7 @@ Keep the dark ground. Remove the four signals that read as generic. Add one edit
 | Token | Before | After | Why |
 |---|---|---|---|
 | `--ground` | `#0a0c10` | `#0a0c10` | unchanged, flat |
-| `--accent` | none | `#7c93ff` | brand accent on dark. 7.6:1 on `--ground`, passes AA at every size used |
+| `--accent` | none | `#7c93ff` | brand accent on dark. 6.97:1 on `--ground`, passes AA at every size used |
 | `--accent-ink` | none | `#0a0c10` | text on an accent fill, if any |
 | `--allow` | `#37d07e` | `#37d07e` | unchanged, decisions only |
 | `--serif` | none | `var(--font-serif), "Instrument Serif", Georgia, serif` | display face |
