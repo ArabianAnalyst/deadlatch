@@ -255,3 +255,26 @@ says.
 ## Follow-ups
 
 - Route-local links still use `--allow` as a link colour: `.app-links a`, `.app-table a`, `.try-chip.allowed` (semantic, keep), `.try-mine`, `.prose a`, `.prose li::before`, `.af-last a`, `.log-arrow`. Ruling 1 of the plan kept them out of this pass. They move to `--accent` in a scoped pass per route, each measured on its own.
+
+## After, production (2026-09-22, main 12a9d3b)
+
+Released through PR #1. Before is production at `ad199a5` measured the same morning on the same machine; after is production at `12a9d3b` about an hour later. Two mobile runs and one desktop, Lighthouse 12, simulated throttling.
+
+| Metric | Before, same day | After | Gate |
+|---|---|---|---|
+| Mobile performance | 95, 98 | 93, 97 | ≥ 96 |
+| Mobile LCP | 2.42 s, 1.88 s | 1.99 s, 1.61 s | ≤ 1.7 s |
+| Mobile FCP | 1.82 s, 1.47 s | 1.94 s, 1.57 s | |
+| TBT | 117 ms, 148 ms | 235 ms, 165 ms | ≤ 190 ms |
+| Page weight, mobile | 316 KiB | 287 KiB, 285 KiB | ≤ 316 KiB |
+| Font bytes | 138 KiB | 109 KiB | |
+| Script bytes | 145 KiB | 144 KiB | lower |
+| Desktop performance, LCP | 100, 0.57 s | 100, 0.47 s | |
+| a11y, best practices, SEO | 100, 100, 100 | 100, 100, 100 | 100 |
+| CLS phone, desktop (buffered observer) | | 0, 0.000019 (two entries, both the console's live ticker text) | 0 |
+| Serif loaded on first navigation | | true, both widths | |
+| Brand green above the fold, console excluded, nav SVG included | | 0 | 0 |
+| a11y on /try, /audit, /log | | 100, 100, 100 | |
+| a11y on /sign-in | | 95, two colour-contrast items inside Clerk's widget (the social button text, the development-mode badge); no file under app/sign-in changed on the branch | |
+
+Reading. Weight, fonts, script, CLS, a11y and the green count meet their gates outright. Performance, LCP and TBT each land on both sides of their gate across two runs, and every one of them is better than or within the noise of the same-day baseline, which itself sat above the 16 September figures the gates were set from. The branch is not slower than main on this machine; the absolute gates were set on a quieter day. Follow-ups: the Clerk social button text colour in the sign-in appearance, and the development badge goes with the production instance.
