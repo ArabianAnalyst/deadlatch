@@ -1536,7 +1536,9 @@ footer {
 .proof-n { font-family: var(--serif); font-size: 2.1rem; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); overflow-wrap: anywhere; line-height: 1; }
 .proof-l { color: var(--muted); font-size: 0.86rem; margin-top: 4px; line-height: 1.5; overflow-wrap: anywhere; }
 .proof-line { color: var(--muted); font-size: 0.95rem; margin: 14px 0 0; }
-.proof-line a { color: var(--accent); text-decoration: none; }
+/* Underlined because it is an accent link inside muted running text: colour alone is
+   1.09:1 against .proof-line's --muted and Lighthouse fails link-in-text-block. */
+.proof-line a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .proof-line a:hover { color: var(--ink); }
 @media (max-width: 760px) { .proof-grid { grid-template-columns: 1fr; gap: 16px; } }
 

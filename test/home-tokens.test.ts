@@ -115,6 +115,32 @@ describe("brand green is gone from the homepage", () => {
   it("the eyebrow is the accent", () => {
     expect(bodyOf(".eyebrow")).toMatch(/color:\s*var\(--accent\)/);
   });
+  /**
+   * The lock in the nav and the favicon are the brand mark and both hard-coded the old
+   * green in markup, where the CSS audit above could never see it. app/opengraph-image.png
+   * is a raster and is a separate regen.
+   */
+  it("the brand mark carries no green, in the nav or in the favicon", () => {
+    for (const f of ["components/SiteNav.tsx", "app/icon.svg"]) {
+      const src = read(f);
+      expect(src, f).not.toMatch(/37d07e|55,\s*208,\s*126/i);
+      expect(src, f).toMatch(/7c93ff/i);
+    }
+  });
+});
+
+describe("accent links in running text", () => {
+  /**
+   * An accent link inside muted body text is 1.09:1 against the text around it, which is
+   * colour alone as the only cue and a Lighthouse link-in-text-block failure. Nav links,
+   * buttons and standalone CTAs are not running text and stay undecorated.
+   */
+  it("the proof band's inline link is underlined", () => {
+    const body = bodyOf(".proof-line a");
+    expect(body, ".proof-line a not found").not.toBe("");
+    expect(body).toMatch(/text-decoration:\s*underline/);
+    expect(body).not.toMatch(/text-decoration:\s*none/);
+  });
 });
 
 describe("no glow", () => {
