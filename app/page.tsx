@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Console from "@/components/Console";
-import FlowGraphLazy from "@/components/FlowGraphLazy";
+import ControlLoop from "@/components/ControlLoop";
 import ProofBand from "@/components/ProofBand";
 import { db } from "@/lib/db/client";
 import { homeProof } from "@/lib/home/proof";
@@ -140,7 +140,7 @@ export default async function Page() {
           <h2>One action, routed through all three.</h2>
           <p>Purse decides it, blackbox records it, Tripwire watches the outcome.</p>
         </div>
-        <FlowGraphLazy />
+        <ControlLoop />
       </section>
 
       <section id="why" className="wrap">
