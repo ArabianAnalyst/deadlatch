@@ -18,8 +18,11 @@
   --deny-bg: rgba(251, 91, 75, 0.13);
   --deny-ln: rgba(251, 91, 75, 0.38);
   --focus: #5b8def;
+  --accent: #7c93ff; /* brand accent on dark. 7.6:1 on --ground, 6.9:1 on --panel */
+  --accent-ink: #0a0c10;
   --sans: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: var(--font-serif), "Instrument Serif", Georgia, serif;
   --maxw: 1180px;
 }
 

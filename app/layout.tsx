@@ -32,6 +32,17 @@ const GeistMono = localFont({
   ],
 });
 
+// The display face. Two static files rather than a variable font; the site uses one weight.
+const InstrumentSerif = localFont({
+  src: [
+    { path: "./fonts/InstrumentSerif-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/InstrumentSerif-Italic.woff2", weight: "400", style: "italic" },
+  ],
+  variable: "--font-serif",
+  display: "optional",
+  preload: true,
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.deadlatch.dev"),
   title: "Deadlatch · Runtime governance for AI agents",
@@ -71,7 +82,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${InstrumentSerif.variable}`}>
       <body>
         <SiteNav />
         {children}
