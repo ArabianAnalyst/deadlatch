@@ -691,24 +691,95 @@ Expected: six lines. Localhost LCP is indicative only (no CDN), so the compariso
 Create `.superpowers/measure.cjs`:
 
 ```js
+// Buffered layout-shift observer, word count, brand-green audit and a real
+// serif-loaded probe, at phone and desktop width.
+//
+//   node .superpowers/measure.cjs [url]        default http://localhost:3010/
+//
+// Uncommitted scratch (.superpowers/ is git-ignored). Recreated from plan Task 4 Step 3
+// with three probe corrections, see the fix-wave report:
+//   * the serif probe used to read getComputedStyle(h1).fontFamily, which returns the
+//     declared stack whether or not the file ever loaded, so it could not be false
+//   * the green count used to scan `.hero *` only, which counts the console's own
+//     semantic green as a brand failure and misses the nav's hard-coded lock
+//   * a shift entry used to carry only a tag and a class, which is not enough to find
+//     the element that moved
+const URL_UNDER_TEST = process.argv[2] || "http://localhost:3010/";
 const { chromium } = require("C:/Users/ARABA/Workspace/Social Content/Carousels/mwp-system/node_modules/playwright");
+
 (async () => {
   const b = await chromium.launch();
-  for (const [name, w, h] of [["phone", 390, 844], ["desktop", 1440, 900]]) {
+  for (const [name, w, h] of [
+    ["phone", 390, 844],
+    ["desktop", 1440, 900],
+  ]) {
     const p = await b.newPage({ viewport: { width: w, height: h } });
     await p.addInitScript(() => {
       window.__shifts = [];
-      new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__shifts.push({ v: e.value, src: (e.sources || []).map((s) => s.node && s.node.tagName + (s.node.className ? "." + s.node.className : "")).join("|") }); }).observe({ type: "layout-shift", buffered: true });
+      new PerformanceObserver((l) => {
+        for (const e of l.getEntries()) {
+          if (e.hadRecentInput) continue;
+          window.__shifts.push({
+            v: e.value,
+            src: (e.sources || []).map((s) => {
+              const n = s.node;
+              if (!n) return "(no node)";
+              const tag = n.tagName || n.nodeName;
+              const cls = n.className && typeof n.className === "string" ? "." + n.className.trim().replace(/\s+/g, ".") : "";
+              const text = (n.textContent || "").trim().replace(/\s+/g, " ").slice(0, 80);
+              return `${tag}${cls} :: ${text}`;
+            }),
+          });
+        }
+      }).observe({ type: "layout-shift", buffered: true });
     });
-    await p.goto("http://localhost:3010/", { waitUntil: "networkidle" });
+    await p.goto(URL_UNDER_TEST, { waitUntil: "networkidle" });
     await p.waitForTimeout(2500);
-    const r = await p.evaluate(() => ({
-      cls: window.__shifts.reduce((a, s) => a + s.v, 0),
-      shifts: window.__shifts,
-      words: document.body.innerText.split(/\s+/).filter(Boolean).length,
-      greenAboveFold: [...document.querySelectorAll(".hero *")].filter((el) => getComputedStyle(el).color === "rgb(55, 208, 126)").length,
-      serifOnH1: getComputedStyle(document.querySelector("h1")).fontFamily.includes("Instrument Serif"),
-    }));
+    const r = await p.evaluate(() => {
+      const GREEN = "rgb(55, 208, 126)";
+      // The brand green above the fold. The console's own green is the semantic colour of
+      // an allowed decision and is explicitly allowed to stay, so it is excluded by
+      // ancestry rather than by class name. The nav is included: its lock is inline SVG,
+      // which no colour probe on .hero would ever see.
+      const scopes = [...document.querySelectorAll(".hero, nav")];
+      const offenders = [];
+      for (const scope of scopes) {
+        for (const el of [scope, ...scope.querySelectorAll("*")]) {
+          if (el.closest(".console")) continue;
+          const cs = getComputedStyle(el);
+          const hits = ["color", "fill", "stroke"].filter((prop) => cs[prop] === GREEN);
+          // An element inherits `color`; only count the node that owns the text.
+          const ownsText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+          const props = hits.filter((prop) => prop !== "color" || ownsText);
+          if (props.length) {
+            offenders.push({
+              sel: el.tagName.toLowerCase() + (typeof el.className === "string" && el.className ? "." + el.className.trim().replace(/\s+/g, ".") : ""),
+              props,
+              text: (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40),
+            });
+          }
+        }
+      }
+      // A real load probe. getComputedStyle only ever reports the declared stack, and
+      // document.fonts.check() is no better: it answers "can these glyphs be painted by
+      // anything available", so it returns true on a page with no serif at all. Only the
+      // font set itself can say whether the face arrived, so iterate it.
+      const faces = [...document.fonts].map((f) => ({ family: f.family, style: f.style, status: f.status }));
+      const serifFaces = faces.filter((f) => f.family.includes("InstrumentSerif") && !f.family.includes("Fallback"));
+      const loaded = (style) => serifFaces.some((f) => f.style === style && f.status === "loaded");
+      return {
+        cls: window.__shifts.reduce((a, s) => a + s.v, 0),
+        shifts: window.__shifts,
+        words: document.body.innerText.split(/\s+/).filter(Boolean).length,
+        greenAboveFold: offenders.length,
+        greenDetail: offenders,
+        serifLoaded: loaded("normal"),
+        serifItalicLoaded: loaded("italic"),
+        serifFaces,
+        // Kept only to show that it cannot fail: true on production, which ships no serif.
+        fontsCheckSaysLoaded: document.fonts.check("400 1em InstrumentSerif"),
+      };
+    });
     console.log(name, JSON.stringify(r));
     await p.close();
   }
@@ -717,7 +788,13 @@ const { chromium } = require("C:/Users/ARABA/Workspace/Social Content/Carousels/
 ```
 
 Run: `cd "/c/Users/ARABA/Workspace/SaaS/deadlatch" && git rev-parse --show-toplevel | grep -qi deadlatch || exit 1; node .superpowers/measure.cjs`
-Expected: `cls` 0 at both widths with an empty `shifts` array, `words` at or under 655, `greenAboveFold` 0, `serifOnH1` true. If `serifOnH1` is false, the font did not load inside the optional window on a cold start; reload once (Playwright caches nothing between contexts, so use `p.reload()` after the first goto) and record both results honestly.
+Expected: `cls` 0 at both widths with an empty `shifts` array, `words` at or under 655, `greenAboveFold` 0, `serifLoaded` true. Run it a second time with the production URL as the argument (`node .superpowers/measure.cjs https://www.deadlatch.dev/`) so the word count and the green count have a like-for-like before column measured by the same tokenizer.
+
+Three probes in the first version of this script could not fail, and the corrected ones above are what the numbers in the spec's After section come from:
+
+- **The serif probe.** `getComputedStyle(h1).fontFamily` returns the declared stack, not what loaded, so it read true even on main where no serif existed. `document.fonts.check("400 1em InstrumentSerif")` is no better: it answers "can these glyphs be painted by anything available", so it returned true against production, which ships no serif at all. Only an iteration over `document.fonts` for a face whose family contains `InstrumentSerif` and whose `status` is `loaded` can be false, and that is the probe above. If it is false the file did not arrive inside the `display: optional` window on a cold start; reload once with `p.reload()` and record both results honestly.
+- **The green count.** `.hero *` counts the console's own `--allow` green, which the spec keeps as the semantic colour of an allowed decision, so the count could never reach 0 and said nothing. The console is excluded by ancestry, `color` counts only on the node that owns the text, and `nav` is included with `fill` and `stroke` because the brand lock is inline SVG that no colour probe on `.hero` would ever see.
+- **The shift sources.** A tag and a class name are not enough to find the element that moved, so each entry also carries the node's `textContent`.
 
 Stop the server: `netstat -ano | findstr :3010` then `taskkill //PID <pid> //F`.
 

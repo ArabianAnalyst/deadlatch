@@ -41,7 +41,7 @@ Every other token is unchanged.
 | `.eyebrow` | `color` | `var(--faint)` | `var(--accent)` |
 | `.btn.primary` | `background`, `color`, `border-color` | `var(--allow)`, `#062012`, `var(--allow)` | `var(--ink)`, `var(--ground)`, `var(--ink)` |
 | `.btn.primary:hover` | `background`, `border-color` | `#43e08c` | `#ffffff` |
-| nav `App` link and any `.ghlink` | `color` | green | `var(--accent)` |
+| nav `App` link and any `.ghlink` | `color` | `var(--muted)` | `var(--muted)` — already muted on main, unchanged |
 | `.flag` | `border-left-color` | current | `var(--accent)` |
 
 Any remaining rule that references `#37d07e` or `rgba(55, 208, 126, …)` outside `.console`, `.proof` and decision chips is a defect. The grep for those two strings must return only console, proof and chip rules when the pass is done.
@@ -147,6 +147,110 @@ Before is production at main `ad199a5`. After is `next start` on localhost, so L
 | Words on the page | 655 | 835 (phone), 853 (desktop) | ≤ 655 |
 | Green above the fold | not measured — the Step 3 script only navigates localhost | 3, phone and desktop alike: `span.pill.allow` ("allow"), `button.g` ("spend $12"), `span.ok` ("✓ ok"), all inside `.hero` | 0 |
 | Script bytes on `/` | mobile 145.3 KiB / 9 requests, desktop 213.1 KiB / 11 requests | mobile 141.5 KiB / 9 requests, desktop 151.4 KiB / 10 requests | lower than main |
+
+### After the fix wave (2026-09-22, branch `home-skin`)
+
+One pass over the whole branch, after the table above. Fonts subset, the accent link in
+running text underlined, the brand lock recoloured, the layering the deleted glows left
+behind removed, and three measurement probes that could not fail replaced.
+
+**Geist, subset to Latin by `scripts/subset-geist.py`**
+
+| File | Before | After | Saved |
+|---|---|---|---|
+| `app/fonts/Geist-Variable.woff2` | 69,652 B (68.0 KiB) | 33,236 B (32.5 KiB) | 35.5 KiB |
+| `app/fonts/GeistMono-Variable.woff2` | 71,368 B (69.7 KiB) | 34,656 B (33.8 KiB) | 35.8 KiB |
+| both | 137.7 KiB | 66.3 KiB | **71.4 KiB** |
+
+Both keep the `wght` axis at 100-900 and every OpenType layout feature. 393 and 426 glyphs
+remain. Re-running the script reproduces the same bytes.
+
+**The serif, for comparison**
+
+| File | Size | Preloaded on |
+|---|---|---|
+| `app/fonts/InstrumentSerif-Regular.woff2` | 21,032 B (20.5 KiB) | every route |
+| `app/fonts/InstrumentSerif-Italic.woff2` | 22,128 B (21.6 KiB) | `/` only |
+| both | 42.1 KiB | |
+
+The italic moved out of the root layout into `app/page.tsx`, so `/audit`, `/log`, `/try`,
+`/app` and `/sign-in` no longer preload 21.6 KiB they never paint. Verified in the build
+output: `InstrumentSerif_Italic-s...woff2` has a `<link rel="preload">` in
+`.next/server/app/index.html` and in no other route's HTML.
+
+**Page weight, mobile**
+
+Projection from the production before figure: 316 - 69 + 43 = **290 KiB**. Measured on
+`next start` at localhost, two mobile runs: **296 KiB**, down from the branch's 367 KiB and
+under the 316 KiB gate. Desktop 310 KiB, down from 382. Roughly 12 KiB of the remaining gap
+to the projection is gzip on the localhost document where the CDN serves Brotli, so the
+preview figure should land at or under the projection. Accessibility is back to **100** at
+both widths, from 96, the `link-in-text-block` failure being the only one.
+
+**Words on the page, like for like**
+
+Both columns measured with the same tokenizer,
+`document.body.innerText.split(/\s+/).filter(Boolean).length`, by
+`.superpowers/measure.cjs`:
+
+| | Phone (390) | Desktop (1440) |
+|---|---|---|
+| Production, main | 798 | 852 |
+| Branch, after the wave | 835 | 853 |
+
+So the copy is +37 words on a phone and +1 on desktop against what is live, not +180 against
+655. The 655 in the table above came from a different method (the 2026-09-14 count of page
+copy, which does not include the console transcript this tokenizer picks up), so the two
+figures were never comparable. The copy itself is unchanged, as the spec requires; the phone
+delta is the static loop strip rendering all three steps where the graph rendered labels
+only.
+
+**Green above the fold, corrected probe**
+
+The old probe counted `.hero *` computed `color`, which includes the console's own `--allow`
+green that this spec keeps as the semantic colour of an allowed decision, and which no
+probe on `.hero` could ever bring to 0. The corrected probe excludes anything inside
+`.console` by ancestry, counts `color` only on the node that owns the text, and adds `nav`
+plus SVG `fill` and `stroke` because the brand lock is inline SVG.
+
+| | Count | What |
+|---|---|---|
+| Production, main | **7** | nav lock `stroke` and `fill`, `.npm b` "@olurabian/purse", `.hero h1 em` "allowed", three `.triad-line .fn b` ("enforce", "prove", "watch") |
+| Branch, after the wave | **0** | phone and desktop alike |
+
+The three the first measurement reported were all inside `.console` and were never
+failures. The two it could not see, the nav lock's shackle and keyhole, were real and are
+fixed. `app/opengraph-image.png` still carries a green lock and is a separate regen.
+
+**Serif loaded**
+
+`getComputedStyle(h1).fontFamily` returns the declared stack whether or not a file arrived,
+so the original probe could not be false. `document.fonts.check("400 1em InstrumentSerif")`
+is no better: it answers whether the glyphs can be painted by anything available and
+returned `true` against production, which ships no serif at all. Iterating `document.fonts`
+can be false, and is:
+
+| | `serifLoaded` | Faces seen |
+|---|---|---|
+| Production, main | `false` | none |
+| Branch, after the wave | `true` | `InstrumentSerif` normal loaded, `InstrumentSerifItalic` italic loaded |
+
+**CLS**
+
+Unchanged, and now attributable. Phone 0 with an empty shifts array. Desktop 0.000019, two
+shifts, both sourced to a `<b>` in the live console transcript ("$12.00 / $200.00" and
+"s3.aws.amazon.com"). Production measures the same 0.000019 from the same two elements, so
+it is the console's own text, not the skin.
+
+**What is not measured here**
+
+Performance, LCP and TBT. Localhost has no CDN and no Brotli, and the preloaded font bytes
+sit ahead of the text paint, which is exactly the part localhost gets wrong. Mobile
+performance reads 88 and 90 and LCP 2.95 s and 2.91 s here, against 95 and 98 and 2.42 s and
+1.88 s for production main under the same harness, and the branch before the wave read 91
+and 85 with LCP 3.28 s and 3.30 s. The three gates that these numbers speak to are settled
+on the preview deploy, and the release gate stays production, as the spec's Gates section
+says.
 
 ## Follow-ups
 
