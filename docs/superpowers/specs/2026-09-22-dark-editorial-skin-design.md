@@ -130,3 +130,24 @@ If any gate fails, the pass is not released. A gate that fails because of the se
 - **Console keeps its dark panel and its green.** The comp showed a static transcript. The live console is better evidence than any transcript and it already exists, so the comp's object is not adopted.
 - **Ground stays `#0a0c10` rather than the comp's `#0c0e12`.** The difference is invisible and the old value is already contrast checked across every token.
 - **Accent is `#7c93ff`, not the site's `--focus` `#5b8def`.** Focus rings stay distinct from brand, which matters for keyboard users. `#5b8def` also fails AA at 12 to 13 px on `--ground`.
+
+## After, local (2026-09-22, branch home-skin)
+
+Before is production at main `ad199a5`. After is `next start` on localhost, so LCP is indicative only and the production LCP is re-measured after release.
+
+| Metric | Before (production) | After (localhost) | Gate |
+|---|---|---|---|
+| Mobile performance, two runs | 95, 98 | 91, 85 | ≥ 96 |
+| Desktop performance | 100 | 100 | |
+| Mobile LCP | 2.42 s, 1.88 s | 3.28 s, 3.30 s (localhost, indicative only) | ≤ 1.7 s (production) |
+| CLS, phone and desktop, buffered observer | not measured — the Step 3 script only navigates localhost | phone 0 (empty shifts array); desktop 0.000019 (2 shifts, both sourced to a `B` element) | 0 |
+| TBT | mobile 117 ms, 148 ms; desktop 8 ms | mobile 121 ms, 321 ms; desktop 2 ms | ≤ 190 ms |
+| Page weight, mobile | 316 KiB | 367 KiB | ≤ 316 KiB |
+| a11y, best practices, SEO | 100, 100, 100 | 96, 100, 100 | 100 |
+| Words on the page | 655 | 835 (phone), 853 (desktop) | ≤ 655 |
+| Green above the fold | not measured — the Step 3 script only navigates localhost | 3, phone and desktop alike: `span.pill.allow` ("allow"), `button.g` ("spend $12"), `span.ok` ("✓ ok"), all inside `.hero` | 0 |
+| Script bytes on `/` | mobile 145.3 KiB / 9 requests, desktop 213.1 KiB / 11 requests | mobile 141.5 KiB / 9 requests, desktop 151.4 KiB / 10 requests | lower than main |
+
+## Follow-ups
+
+- Route-local links still use `--allow` as a link colour: `.app-links a`, `.app-table a`, `.try-chip.allowed` (semantic, keep), `.try-mine`, `.prose a`, `.prose li::before`, `.af-last a`, `.log-arrow`. Ruling 1 of the plan kept them out of this pass. They move to `--accent` in a scoped pass per route, each measured on its own.
