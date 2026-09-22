@@ -162,6 +162,9 @@ nav {
   margin: 16px 0 0;
 }
 .hero h1 em {
+  /* The italic face is declared on the homepage only, so the variable exists on `/`
+     and nowhere else. var(--serif) behind it is what every other route resolves to. */
+  font-family: var(--font-serif-italic), var(--serif);
   font-style: italic;
   color: var(--accent);
 }
@@ -722,6 +725,7 @@ a.card:hover {
   text-wrap: balance;
 }
 .why .big em {
+  font-family: var(--font-serif-italic), var(--serif);
   font-style: italic;
   color: var(--accent);
 }

@@ -32,15 +32,18 @@ const GeistMono = localFont({
   ],
 });
 
-// The display face. Two static files rather than a variable font; the site uses one weight.
+// The display face, regular only. The italic is declared on the homepage instead
+// (app/page.tsx), because `/` is the only route that renders an italic serif and a
+// root declaration preloads 22 KiB on every route that never paints it.
+// adjustFontFallback picks the metric-matched Times New Roman fallback, so a cache
+// miss under `display: optional` renders a serif at the right size instead of Arial
+// scaled to 77 percent.
 const InstrumentSerif = localFont({
-  src: [
-    { path: "./fonts/InstrumentSerif-Regular.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/InstrumentSerif-Italic.woff2", weight: "400", style: "italic" },
-  ],
+  src: [{ path: "./fonts/InstrumentSerif-Regular.woff2", weight: "400", style: "normal" }],
   variable: "--font-serif",
   display: "optional",
   preload: true,
+  adjustFontFallback: "Times New Roman",
 });
 
 export const metadata: Metadata = {

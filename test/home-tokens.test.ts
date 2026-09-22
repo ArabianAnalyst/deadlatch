@@ -4,6 +4,7 @@ import fs from "node:fs";
 const read = (rel: string) => fs.readFileSync(new URL(`../${rel}`, import.meta.url), "utf8");
 const css = read("app/globals.css");
 const layout = read("app/layout.tsx");
+const page = read("app/page.tsx");
 
 /** Every `selector { body }` pair in globals.css. The file has no nested selectors; @media wrappers are skipped by the regex because their body contains braces. */
 export function rules(): Array<{ sel: string; body: string }> {
@@ -28,14 +29,32 @@ describe("tokens", () => {
   });
 });
 
+const fontSize = (f: string) => fs.statSync(new URL(`../app/fonts/${f}`, import.meta.url)).size;
+
 describe("serif font", () => {
-  it("is declared as a local font with display optional and preload", () => {
+  it("is declared in the root layout as the regular face only", () => {
     const block = layout.slice(layout.indexOf("const InstrumentSerif"), layout.indexOf("export const metadata"));
     expect(block).toContain('variable: "--font-serif"');
     expect(block).toContain('display: "optional"');
     expect(block).toContain("preload: true");
+    // Without this a cache miss under display: optional renders Arial at 77 percent, not a serif.
+    expect(block).toContain('adjustFontFallback: "Times New Roman"');
     expect(block).toContain('path: "./fonts/InstrumentSerif-Regular.woff2"');
+    // The italic belongs to the homepage. A root declaration preloads 22 KiB on every route.
+    expect(block).not.toContain("InstrumentSerif-Italic.woff2");
+    expect(layout).not.toContain("--font-serif-italic");
+  });
+  it("declares the italic face on the homepage and nowhere else", () => {
+    const block = page.slice(page.indexOf("const InstrumentSerifItalic"), page.indexOf("export const revalidate"));
+    expect(block, "no InstrumentSerifItalic declaration in app/page.tsx").not.toBe("");
     expect(block).toContain('path: "./fonts/InstrumentSerif-Italic.woff2"');
+    expect(block).toContain('weight: "400"');
+    expect(block).toContain('style: "italic"');
+    expect(block).toContain('variable: "--font-serif-italic"');
+    expect(block).toContain('display: "optional"');
+    expect(block).toContain("preload: true");
+    expect(block).toContain('adjustFontFallback: "Times New Roman"');
+    expect(page).toContain("<div className={InstrumentSerifItalic.variable}>");
   });
   it("is applied on the html element next to the two Geist variables", () => {
     expect(layout).toMatch(/<html[^>]*className=\{`\$\{GeistSans\.variable\} \$\{GeistMono\.variable\} \$\{InstrumentSerif\.variable\}`\}/);
@@ -44,9 +63,29 @@ describe("serif font", () => {
     for (const f of ["InstrumentSerif-Regular.woff2", "InstrumentSerif-Italic.woff2", "InstrumentSerif-OFL.txt"]) {
       expect(fs.existsSync(new URL(`../app/fonts/${f}`, import.meta.url)), f).toBe(true);
     }
-    const reg = fs.statSync(new URL("../app/fonts/InstrumentSerif-Regular.woff2", import.meta.url)).size;
+    const reg = fontSize("InstrumentSerif-Regular.woff2");
     expect(reg).toBeGreaterThan(8_000);
     expect(reg).toBeLessThan(60_000);
+  });
+});
+
+describe("Geist stays subset", () => {
+  /**
+   * The two Geist faces are preloaded on every route, so their bytes sit ahead of the
+   * text paint. scripts/subset-geist.py cuts them to the Latin range the site renders,
+   * which is what pays for the preloaded serif inside the 316 KiB mobile gate. A fresh
+   * upstream drop-in is ~70 KiB each and would silently break that gate, so the size is
+   * a test and the script that reproduces it is committed.
+   */
+  it("keeps both variable faces under 40 KiB", () => {
+    for (const f of ["Geist-Variable.woff2", "GeistMono-Variable.woff2"]) {
+      expect(fontSize(f), f).toBeLessThan(40 * 1024);
+      expect(fontSize(f), f).toBeGreaterThan(20 * 1024);
+    }
+  });
+  it("ships the subsetting script and the Geist licence beside the modified files", () => {
+    expect(fs.existsSync(new URL("../scripts/subset-geist.py", import.meta.url))).toBe(true);
+    expect(fs.existsSync(new URL("../app/fonts/Geist-OFL.txt", import.meta.url))).toBe(true);
   });
 });
 
@@ -88,11 +127,22 @@ describe("no glow", () => {
   });
 });
 
+/** The display selectors that must resolve to the serif stack. */
+const DISPLAY = [".hero h1", ".sec-head h2", ".why .big", ".brand", ".proof-n"];
+/** The two emphasis selectors that must resolve to the homepage-only italic face first. */
+const DISPLAY_ITALIC = [".hero h1 em", ".why .big em"];
+
 describe("display type", () => {
   it("uses the serif on the hero headline, section heads, the big line, the brand and the proof numbers", () => {
-    for (const sel of [".hero h1", ".sec-head h2", ".why .big", ".brand", ".proof-n"]) {
+    for (const sel of DISPLAY) {
       expect(bodyOf(sel), sel).toMatch(/font-family:\s*var\(--serif\)/);
       expect(bodyOf(sel), sel).toMatch(/font-weight:\s*400/);
+    }
+  });
+  it("puts the homepage italic variable first on the two emphasis selectors", () => {
+    for (const sel of DISPLAY_ITALIC) {
+      expect(bodyOf(sel), sel).toMatch(/font-family:\s*var\(--font-serif-italic\),\s*var\(--serif\)/);
+      expect(bodyOf(sel), sel).toMatch(/font-style:\s*italic/);
     }
   });
 });

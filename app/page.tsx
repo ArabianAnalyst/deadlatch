@@ -1,9 +1,24 @@
+import localFont from "next/font/local";
 import Link from "next/link";
 import Console from "@/components/Console";
 import ControlLoop from "@/components/ControlLoop";
 import ProofBand from "@/components/ProofBand";
 import { db } from "@/lib/db/client";
 import { homeProof } from "@/lib/home/proof";
+
+/**
+ * The italic display face. Declared here rather than in the root layout because `/`
+ * is the only route with an italic serif on it (`.hero h1 em`, `.why .big em`), and a
+ * root declaration preloads 22 KiB on /try, /app, /audit, /log and /sign-in for nothing.
+ * The variable is applied to the page's outermost element, so it exists only on `/`.
+ */
+const InstrumentSerifItalic = localFont({
+  src: [{ path: "./fonts/InstrumentSerif-Italic.woff2", weight: "400", style: "italic" }],
+  variable: "--font-serif-italic",
+  display: "optional",
+  preload: true,
+  adjustFontFallback: "Times New Roman",
+});
 
 /** The proof band's numbers refresh at most once a minute, so the witness sees one read a minute from this page. */
 export const revalidate = 60;
@@ -26,7 +41,7 @@ const NPM = {
 export default async function Page() {
   const proof = await homeProof({ db, fetch });
   return (
-    <>
+    <div className={InstrumentSerifItalic.variable}>
       <header className="wrap hero" id="top">
         <div className="hcopy">
           <div className="eyebrow">Open runtime governance for AI agents</div>
@@ -339,6 +354,6 @@ export default async function Page() {
           <div className="foot-note">Open source · enforce · prove · watch · {SHIPS} dated ships</div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
