@@ -52,7 +52,6 @@ a {
   margin: 0 auto;
   padding: 0 24px;
   position: relative;
-  z-index: 1;
 }
 .mono {
   font-family: var(--mono);
@@ -146,11 +145,6 @@ nav {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.14fr);
   gap: 52px;
   align-items: start;
-  position: relative;
-}
-.hero > * {
-  position: relative;
-  z-index: 1;
 }
 .hero h1 {
   font-family: var(--serif);
@@ -839,29 +833,7 @@ a.card:hover {
   }
 }
 
-/* WHY NOW — field convergence. depth borrowed (layered ground + soft
-   accent glows), rendered in Deadlatch's own near-black + green palette. */
-.now {
-  position: relative;
-}
-
-/* PAGE DEPTH — each major section sits in its own soft pool of light,
-   anchored to a different corner so the page reads as lit, not tiled. */
-#stack,
-#audit,
-#start {
-  position: relative;
-}
-#stack > *,
-#audit > *,
-#start > * {
-  position: relative;
-  z-index: 1;
-}
-.now > * {
-  position: relative;
-  z-index: 1;
-}
+/* WHY NOW */
 .now .sec-head h2 {
   letter-spacing: -0.028em;
 }

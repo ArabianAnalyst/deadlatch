@@ -6,7 +6,18 @@ const css = read("app/globals.css");
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
 
-/** Every `selector { body }` pair in globals.css. The file has no nested selectors; @media wrappers are skipped by the regex because their body contains braces. */
+/**
+ * Every `selector { body }` pair in globals.css. The file has no nested selectors;
+ * @media wrappers are skipped by the regex because their body contains braces.
+ *
+ * Two limits to know before putting a selector in one of the lists below. A multi-line
+ * selector list is attributed to its LAST line only, so `#stack,
+#audit,
+#start { }`
+ * is recorded under `#start` and a lookup for `#stack` finds nothing. A single-line comma
+ * list is recorded verbatim, so `bodyOf(".a")` also misses `.a, .b { ... }`. Either way
+ * the miss is silent, which is what the empty-body guard at the end of this file catches.
+ */
 export function rules(): Array<{ sel: string; body: string }> {
   const out: Array<{ sel: string; body: string }> = [];
   const re = /([^{}]+)\{([^{}]*)\}/g;
@@ -187,5 +198,20 @@ describe("contrast", () => {
   });
   it("primary button text passes AA", () => {
     expect(contrast("#0a0c10", "#e8edf3")).toBeGreaterThan(7);
+  });
+});
+
+/**
+ * A rename must fail loudly, not vacuously. Every selector asserted on above has to
+ * resolve to a non-empty rule body: if a rule is renamed, `bodyOf()` returns "" and a
+ * negative assertion such as `not.toMatch(GREEN)` passes against nothing at all. The
+ * BRAND cases already carry this check one selector at a time; the display lists,
+ * `.eyebrow` and `.proof-line a` did not.
+ */
+describe("every tested selector still exists", () => {
+  it("resolves each asserted selector to a non-empty rule body", () => {
+    const asserted = [...new Set([...BRAND, ...DISPLAY, ...DISPLAY_ITALIC, ":root", "body", ".eyebrow", ".proof-line a"])];
+    const missing = asserted.filter((sel) => bodyOf(sel) === "");
+    expect(missing, `selectors missing from app/globals.css: ${missing.join(", ")}`).toEqual([]);
   });
 });
