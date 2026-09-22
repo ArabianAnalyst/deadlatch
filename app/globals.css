@@ -598,8 +598,17 @@ nav {
 
 /* SECTIONS */
 section {
-  padding: 70px 0;
   border-top: 1px solid var(--line);
+}
+/* .wrap sets `padding: 0 24px` and, as a class, outranks a bare element selector, so the
+   old `section { padding: 70px 0 }` never applied. This rule outranks .wrap. */
+section.wrap {
+  padding: 72px 24px;
+}
+@media (max-width: 760px) {
+  section.wrap {
+    padding: 48px 20px;
+  }
 }
 .sec-head {
   max-width: 60ch;
@@ -1502,7 +1511,7 @@ footer {
 .try-cta { margin-top: 16px; }
 
 /* proof */
-.proof { padding-top: 0; padding-bottom: 8px; border-top: 0; }
+section.proof { padding-top: 0; padding-bottom: 28px; border-top: 0; }
 .proof-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 18px 20px; }
 .proof-cell { min-width: 0; }
 .proof-n { font-family: var(--serif); font-size: 2.1rem; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); overflow-wrap: anywhere; line-height: 1; }

@@ -215,3 +215,20 @@ describe("every tested selector still exists", () => {
     expect(missing, `selectors missing from app/globals.css: ${missing.join(", ")}`).toEqual([]);
   });
 });
+
+/** The stylesheet claimed 70px of section padding for weeks and never delivered it: `.wrap { padding: 0 24px }` outranked `section { … }`. The rule that applies must outrank .wrap. */
+describe("section rhythm", () => {
+  it("gives every wrapped section vertical padding through a selector that beats .wrap", () => {
+    const body = bodyOf("section.wrap");
+    expect(body, "section.wrap rule missing").not.toBe("");
+    expect(body).toMatch(/padding:\s*72px 24px/);
+    expect(body).toMatch(/padding:\s*48px 20px/);
+    expect(bodyOf("section")).not.toMatch(/padding/);
+  });
+  it("keeps the proof band tight under the hero", () => {
+    const body = bodyOf("section.proof");
+    expect(body).toMatch(/padding-top:\s*0/);
+    expect(body).toMatch(/padding-bottom:\s*28px/);
+    expect(bodyOf(".proof")).toBe("");
+  });
+});
