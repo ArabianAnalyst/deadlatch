@@ -84,7 +84,7 @@ Remove `components/FlowGraph.tsx`, `components/FlowGraphLazy.tsx`, the `.rf-*` r
 
 ### Copy
 
-Unchanged. The h1, lede, flag, section heads and the loop's three lines carry the same meaning as today. Word count stays inside the 655 measured on 2026-09-14, and the existing copy count test must still pass.
+Unchanged. The h1, lede, flag, section heads and the loop's three lines carry the same meaning as today. Word count stays inside the 655 measured on 2026-09-14. That figure was a measurement, not a test, so the plan re-measures it the same way rather than relying on a test that does not exist.
 
 ## Non goals
 
