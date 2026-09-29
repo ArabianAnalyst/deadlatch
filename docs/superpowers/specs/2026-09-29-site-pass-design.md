@@ -112,3 +112,22 @@ The two misses above had one cause the table did not name. The brand link in the
 | `/log` | 100 | 100 | 100 | 0 | 279 KiB | ≤ 300 KiB, pass |
 
 The italic and the homepage payloads no longer appear in the request list of any of the three routes. Clicking the logo still navigates normally, it simply fetches the homepage on hover or click instead of on load.
+
+## After, production
+
+Released 2026-09-29 by fast-forwarding main to `eaa1c23` (pull request #2). Measured on https://www.deadlatch.dev with Lighthouse 12.8.2 mobile, the same method as above.
+
+| Route | A11y | Best practices | SEO | CLS | Weight | Gate |
+|---|---|---|---|---|---|---|
+| `/try` | 100 | 100 | 100 | 0 | 270 KiB | ≤ 300, pass |
+| `/audit` | 100 | 100 | 100 | 0 | 294 KiB | ≤ 310, pass |
+| `/log` | 100 | 100 | 100 | 0 | 290 KiB | ≤ 300, pass |
+| `/log/green-for-21-days` | 100 | 100 | 100 | 0 | 274 KiB | pass at the `/log` cap |
+
+Playwright at 1440 and 390 on those four routes and the homepage found 0 console errors and no horizontal scroll anywhere.
+
+With Neon still refusing on its quota, pressing "Pay $12.50" on `/try` got 200 from both `/api/try/request` and `/api/try/execute`, and the chain grew. Before the release the same press returned 500. `/api/try/flags` answers 200 with `paused: true`, and the page shows the paused sentence from D2.
+
+Performance is not a gate. The first production run of `/try` and `/audit` scored 83 and 85 on a cold function. Two reruns each scored 93 and 99 on `/try` and 98 and 99 on `/audit`.
+
+Every gate in the table at the top of this spec is met.
