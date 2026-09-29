@@ -16,7 +16,7 @@ const InstrumentSerifItalic = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Agent Payment Security Audit — Deadlatch",
+  title: "Agent Payment Security Audit · Deadlatch",
   description: "Can a compromised agent move money outside policy? Nine questions, eight dimensions, blast radius in your own numbers. Runs in your browser, nothing leaves the page.",
   alternates: { canonical: "https://www.deadlatch.dev/audit" },
 };

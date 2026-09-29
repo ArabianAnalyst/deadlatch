@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getAllPosts, formatDate } from "@/lib/log";
 
 export const metadata: Metadata = {
-  title: "The Log — Deadlatch",
+  title: "The Log · Deadlatch",
   description:
     "Notes on governing AI agents that act. Enforcement, tamper-evident proof, and the problems still open, written from the build.",
   alternates: { canonical: "https://www.deadlatch.dev/log" },

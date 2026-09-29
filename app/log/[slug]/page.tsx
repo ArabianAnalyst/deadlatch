@@ -16,7 +16,7 @@ export async function generateMetadata({
   const post = getPost(slug);
   if (!post) return {};
   return {
-    title: `${post.meta.title} — Deadlatch`,
+    title: `${post.meta.title} · Deadlatch`,
     description: post.meta.description,
     alternates: { canonical: `https://www.deadlatch.dev/log/${slug}` },
     openGraph: {
