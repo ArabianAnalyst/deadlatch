@@ -156,8 +156,8 @@ nav {
   margin: 16px 0 0;
 }
 .hero h1 em {
-  /* The italic face is declared on the homepage only, so the variable exists on `/`
-     and nowhere else. var(--serif) behind it is what every other route resolves to. */
+  /* The italic face is declared page-locally on `/` and `/audit`, so the variable exists
+     there and nowhere else. var(--serif) behind it is what every other route resolves to. */
   font-family: var(--font-serif-italic), var(--serif);
   font-style: italic;
   color: var(--accent);
@@ -1380,7 +1380,7 @@ footer {
 
 /* audit page */
 .af-hero{margin-bottom:0}
-.af-hero h1 em{color:var(--accent)}
+.af-hero h1 em{font-family:var(--font-serif-italic),var(--serif);font-style:italic;color:var(--accent)}
 .af-hero p{max-width:62ch}
 .af-trust{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:.85rem;color:var(--ink)}
 .af-dot{width:8px;height:8px;border-radius:50%;background:var(--allow);flex:none}

@@ -43,7 +43,8 @@ function fromIntake(it: Intake): { answers: Answers; notes: Record<string, boole
       else if (f.kind === "money") {
         const m = v as Money;
         const c = (m.currency ?? "USD").toUpperCase();
-        o[f.key] = (c === "USD" ? "$" : c === "GBP" ? "£" : "") + m.amount + (c === "USD" || c === "GBP" ? "" : " " + c);
+        const amount = Number.isInteger(m.amount) ? String(m.amount) : m.amount.toFixed(2);
+        o[f.key] = (c === "USD" ? "$" : c === "GBP" ? "£" : "") + amount + (c === "USD" || c === "GBP" ? "" : " " + c);
       }
       else if (f.kind === "boolean") o[f.key] = v ? "yes" : "no";
       else o[f.key] = String(v);

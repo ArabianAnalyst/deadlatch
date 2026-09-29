@@ -5,6 +5,7 @@ const read = (rel: string) => fs.readFileSync(new URL(`../${rel}`, import.meta.u
 const css = read("app/globals.css");
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
+const auditPage = read("app/audit/page.tsx");
 
 /**
  * Every `selector { body }` pair in globals.css. The file has no nested selectors;
@@ -51,11 +52,11 @@ describe("serif font", () => {
     // Without this a cache miss under display: optional renders Arial at 77 percent, not a serif.
     expect(block).toContain('adjustFontFallback: "Times New Roman"');
     expect(block).toContain('path: "./fonts/InstrumentSerif-Regular.woff2"');
-    // The italic belongs to the homepage. A root declaration preloads 22 KiB on every route.
+    // The italic belongs to the pages that paint it. A root declaration preloads 22 KiB on every route.
     expect(block).not.toContain("InstrumentSerif-Italic.woff2");
     expect(layout).not.toContain("--font-serif-italic");
   });
-  it("declares the italic face on the homepage and nowhere else", () => {
+  it("declares the italic face on the homepage", () => {
     const block = page.slice(page.indexOf("const InstrumentSerifItalic"), page.indexOf("export const revalidate"));
     expect(block, "no InstrumentSerifItalic declaration in app/page.tsx").not.toBe("");
     expect(block).toContain('path: "./fonts/InstrumentSerif-Italic.woff2"');
@@ -66,6 +67,23 @@ describe("serif font", () => {
     expect(block).toContain("preload: true");
     expect(block).toContain('adjustFontFallback: "Times New Roman"');
     expect(page).toContain("<div className={InstrumentSerifItalic.variable}>");
+  });
+  /** Without its own declaration the /audit hero asks for an italic the page never loaded, and the browser slants the regular cut. */
+  it("declares the same italic face on /audit and sets the hero emphasis in it", () => {
+    const block = auditPage.slice(auditPage.indexOf("const InstrumentSerifItalic"), auditPage.indexOf("export const metadata"));
+    expect(block, "no InstrumentSerifItalic declaration in app/audit/page.tsx").not.toBe("");
+    expect(block).toContain('path: "../fonts/InstrumentSerif-Italic.woff2"');
+    expect(block).toContain('style: "italic"');
+    expect(block).toContain('variable: "--font-serif-italic"');
+    expect(block).toContain('display: "optional"');
+    expect(block).toContain("preload: true");
+    expect(block).toContain('adjustFontFallback: "Times New Roman"');
+    expect(auditPage).toMatch(/<main className=\{`[^`]*\$\{InstrumentSerifItalic\.variable\}`\}>/);
+    const em = bodyOf(".af-hero h1 em");
+    expect(em, ".af-hero h1 em not found").not.toBe("");
+    expect(em).toMatch(/font-family:\s*var\(--font-serif-italic\),\s*var\(--serif\)/);
+    expect(em).toMatch(/font-style:\s*italic/);
+    expect(em).toMatch(/color:\s*var\(--accent\)/);
   });
   it("is applied on the html element next to the two Geist variables", () => {
     expect(layout).toMatch(/<html[^>]*className=\{`\$\{GeistSans\.variable\} \$\{GeistMono\.variable\} \$\{InstrumentSerif\.variable\}`\}/);

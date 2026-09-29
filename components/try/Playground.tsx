@@ -12,7 +12,7 @@ interface Env { seq: number; id: string; ts: string; kind: string; payload: { st
 interface ChainDoc { total: number; head: { seq: number; hash: string } | null; records: Env[]; error?: string }
 interface AnchorDoc { stream: string; total: number; head: { seq: number; hash: string } | null; lastAnchor: { seq: number; head: string; at: string; logIndex: string; logUrl: string; logHost: string | null } | null; verify: { ok: boolean; coveredUpTo: number | null; reason: string | null }; verifyCommand: string; error?: string }
 interface FlagRow { id: string; expectationId: string; reason: string; ref: { seq: number }; payee: string | null; amount: string | null; at: string; window?: { count?: number } }
-interface FlagsDoc { monitor: { state: "never" | "ok" | "amber" | "red"; cursorSeq: number | null }; flags: FlagRow[]; paused?: boolean; error?: string }
+export interface FlagsDoc { monitor: { state: "never" | "ok" | "amber" | "red"; cursorSeq: number | null }; flags: FlagRow[]; paused?: boolean; error?: string }
 
 const BUTTONS: { preset: Preset; label: string }[] = [
   { preset: "allowed", label: "Pay $12.50" },
@@ -75,6 +75,71 @@ function errorLine(error: string, brokerUrl: string) {
       {msg}
       {msg.includes("broker") && <> · <a href={`${brokerUrl}/healthz`} target="_blank" rel="noopener">health</a></>}
     </p>
+  );
+}
+
+/** What the Five in a row watch needs from the component, passed in so the loop runs in a test without a browser. */
+export interface WatchIO {
+  fetchFlags: () => Promise<FlagsDoc>;
+  wait: (ms: number) => Promise<unknown>;
+  alive: () => boolean;
+  now: () => number;
+  setFlags: (update: (prev: FlagsDoc | null) => FlagsDoc | null) => void;
+  setWatchError: (error: string | null) => void;
+  setWatchNote: (note: string | null) => void;
+}
+
+/**
+ * After the fifth spend, poll the flags route every five seconds for ninety seconds until a new flag appears.
+ * A paused reply ends the watch at once and clears the note, because no flag can arrive while the dashboard
+ * database is not answering, and a "Watching for the flag" line would sit on screen with nothing behind it.
+ */
+export async function watchAfterFive(io: WatchIO): Promise<void> {
+  const seen = await io.fetchFlags();
+  if (!seen.error) io.setFlags(() => seen);
+  if (seen.paused) { io.setWatchNote(null); return; }
+  const known = new Set((seen.flags ?? []).map((f) => f.id));
+  const started = io.now();
+  io.setWatchNote("Watching for the flag. The monitor reads the chain every fifteen seconds.");
+  for (let t = 0; t < 18; t++) {
+    await io.wait(5000);
+    if (!io.alive()) return;
+    const doc = await io.fetchFlags();
+    io.setFlags((prev) => (!doc.error || !prev ? doc : prev));
+    io.setWatchError(doc.error ? plain(doc.error) : null);
+    if (doc.paused) { io.setWatchNote(null); return; }
+    const fresh = (doc.flags ?? []).find((f) => !known.has(f.id));
+    if (fresh) { io.setWatchNote(`Flagged ${Math.round((io.now() - started) / 1000)} seconds after the fifth spend.`); return; }
+  }
+  io.setWatchNote("No flag inside ninety seconds. The monitor may be behind, the panel keeps the last state it had.");
+}
+
+/**
+ * The Watch column between its eyebrow and its links. While paused it shows one sentence and nothing it cannot
+ * read, so no monitor status row and no empty-state line inviting a press that cannot raise a flag.
+ */
+export function WatchBody({ flags, watchError, watchNote }: { flags: FlagsDoc | null; watchError: string | null; watchNote: string | null }) {
+  const paused = Boolean(flags?.paused);
+  return (
+    <>
+      {paused ? (
+        <p className="try-paused">Watch is paused. The dashboard database is not answering, so flags will show here when it is back.</p>
+      ) : watchError && <p className="app-error mono">{watchError}</p>}
+      {flags && flags.monitor && !paused && (
+        <div className="app-status"><span className={`app-dot ${flags.monitor.state}`} aria-hidden="true" /><div><div className="app-status-label">{STATE_LABEL[flags.monitor.state]}</div><div className="mono app-muted">{flags.monitor.cursorSeq !== null ? `cursor ${flags.monitor.cursorSeq}` : "no cursor yet"}</div></div></div>
+      )}
+      {watchNote && <p className="try-note">{watchNote}</p>}
+      <div className="try-flags">
+        {flags && flags.monitor && !paused && flags.flags && flags.flags.length === 0 && <p className="app-muted">No flags yet. Five in a row changes that.</p>}
+        {flags?.flags?.map((f) => (
+          <article key={f.id} className="try-flag">
+            <div className="try-rec-hd"><span className="try-chip denied">{f.expectationId}</span><span className="mono app-muted">seq {f.ref.seq}</span></div>
+            <p className="mono">{f.reason}</p>
+            <p className="app-muted mono">{f.payee ?? ""}{f.amount ? ` · ${f.amount}` : ""} · {new Date(f.at).toISOString()}</p>
+          </article>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -186,23 +251,15 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
       }
       busyRef.current = false;
       setBusy(false);
-      const seen = await get<FlagsDoc>("/api/try/flags");
-      if (!seen.error) setFlags((prev) => (seen.error && prev ? prev : seen));
-      const known = new Set((seen.flags ?? []).map((f) => f.id));
-      const started = Date.now();
-      let last: FlagsDoc = seen;
-      setWatchNote("Watching for the flag. The monitor reads the chain every fifteen seconds.");
-      for (let t = 0; t < 18; t++) {
-        await wait(5000);
-        if (!mounted.current) return;
-        const doc = await get<FlagsDoc>("/api/try/flags");
-        last = doc;
-        setFlags((prev) => (!doc.error || !prev ? doc : prev));
-        setWatchError(doc.error ? plain(doc.error) : null);
-        const fresh = (doc.flags ?? []).find((f) => !known.has(f.id));
-        if (fresh) { setWatchNote(`Flagged ${Math.round((Date.now() - started) / 1000)} seconds after the fifth spend.`); return; }
-      }
-      if (!last.paused) setWatchNote("No flag inside ninety seconds. The monitor may be behind, the panel keeps the last state it had.");
+      await watchAfterFive({
+        fetchFlags: () => get<FlagsDoc>("/api/try/flags"),
+        wait,
+        alive: () => mounted.current,
+        now: Date.now,
+        setFlags,
+        setWatchError,
+        setWatchNote,
+      });
     } finally {
       busyRef.current = false;
       setBusy(false);
@@ -268,23 +325,7 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
 
       <section className="app-card try-panel">
         <div className="eyebrow">Watch</div>
-        {flags?.paused ? (
-          <p className="try-paused">Watch is paused. The monitor is still running, its flags will show here when the dashboard is back.</p>
-        ) : watchError && <p className="app-error mono">{watchError}</p>}
-        {flags && flags.monitor && (
-          <div className="app-status"><span className={`app-dot ${flags.monitor.state}`} aria-hidden="true" /><div><div className="app-status-label">{STATE_LABEL[flags.monitor.state]}</div><div className="mono app-muted">{flags.monitor.cursorSeq !== null ? `cursor ${flags.monitor.cursorSeq}` : "no cursor yet"}</div></div></div>
-        )}
-        {watchNote && <p className="try-note">{watchNote}</p>}
-        <div className="try-flags">
-          {flags && flags.monitor && flags.flags && flags.flags.length === 0 && <p className="app-muted">No flags yet. Five in a row changes that.</p>}
-          {flags?.flags?.map((f) => (
-            <article key={f.id} className="try-flag">
-              <div className="try-rec-hd"><span className="try-chip denied">{f.expectationId}</span><span className="mono app-muted">seq {f.ref.seq}</span></div>
-              <p className="mono">{f.reason}</p>
-              <p className="app-muted mono">{f.payee ?? ""}{f.amount ? ` · ${f.amount}` : ""} · {new Date(f.at).toISOString()}</p>
-            </article>
-          ))}
-        </div>
+        <WatchBody flags={flags} watchError={watchError} watchNote={watchNote} />
         <p className="try-cta"><a className="try-own" href="/app">Point your own broker at this ↗</a></p>
         <p className="app-muted mono try-broker">broker {brokerUrl} · witness {witnessUrl}</p>
       </section>

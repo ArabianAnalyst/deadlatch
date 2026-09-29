@@ -30,7 +30,7 @@ Semantic greens stay green: decision chips, `ok` states, the enforce leg. The br
 ### D2. /try stops depending on the database to work
 
 - **Rate limiter fails open.** In `lib/try/handlers.ts`, when `take()` throws, the handler logs `console.error("try limiter unavailable", cause)` and lets the call through. The playground broker runs a mock rail with its own caps, so an unlimited visitor can at worst exhaust the broker's own daily cap, which it already refuses. Cost if wrong: a burst of demo traffic reaches the mock broker unthrottled while the database is down.
-- **Watch pauses instead of failing.** `flags()` catches, logs `console.error("try flags unavailable", cause)`, and returns `200` with `{ paused: true, monitor: { state: "never", cursorSeq: null }, flags: [] }`. `Playground.tsx` shows "Watch is paused. The monitor is still running, its flags will show here when the dashboard is back." instead of an error. No red console error on page load.
+- **Watch pauses instead of failing.** `flags()` catches, logs `console.error("try flags unavailable", cause)`, and returns `200` with `{ paused: true, monitor: { state: "never", cursorSeq: null }, flags: [] }`. `Playground.tsx` shows "Watch is paused. The dashboard database is not answering, so flags will show here when it is back." instead of an error. No red console error on page load.
 - **Ages read as ages.** `Playground.tsx` uses `minutesAgo` from `lib/home/format.ts` instead of inline minute arithmetic.
 - **Layout.** `/try` uses `.logwrap.wide`. Long hosts and hashes use `overflow-wrap: anywhere` inside their own line, not the column. The "Point your own broker at this" pill becomes a plain link with an arrow.
 
@@ -53,7 +53,7 @@ The reference is `docs/superpowers/specs/2026-09-29-audit-comp.html` (published 
 
 ## Non goals
 
-- No change to the homepage, `/app`, `/sign-in` or the API contracts other than the two handler behaviours in D2.
+- No change to the homepage, `/app`, `/sign-in` or the API contracts other than the two handler behaviours in D2. `/app` and the 404 share the inner-page heading and arrow restyle from D1 (`.log-hd h1`, `.log-arrow`), and nothing else on them changes.
 - No new runtime dependency.
 - The Neon plan itself.
 

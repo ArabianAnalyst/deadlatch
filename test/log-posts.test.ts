@@ -14,7 +14,7 @@ for (const slug of ["green-for-21-days", "four-states-of-a-control"]) {
     it("uses no colons or em dashes in its prose", () => {
       const prose = content.replace(/```[\s\S]*?```/g, "").replace(/`[^`]*`/g, "").replace(/https?:\/\/\S+/g, "");
       expect(prose).not.toMatch(/—/);
-      expect(prose).not.toMatch(/[A-Za-z0-9)]: /);
+      expect(prose).not.toMatch(/[A-Za-z0-9)"'”’\]*]: /);
     });
   });
 }

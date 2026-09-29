@@ -7,9 +7,9 @@ import { db } from "@/lib/db/client";
 import { homeProof } from "@/lib/home/proof";
 
 /**
- * The italic display face. Declared here rather than in the root layout because `/`
- * is the only route with an italic serif on it (`.hero h1 em`, `.why .big em`), and a
- * root declaration preloads 22 KiB on /try, /app, /audit, /log and /sign-in for nothing.
+ * The italic display face. Declared here rather than in the root layout because only `/`
+ * (`.hero h1 em`, `.why .big em`) and `/audit` (`.af-hero h1 em`, declared in its own page)
+ * paint an italic serif, and a root declaration preloads 22 KiB on /try, /app, /log and /sign-in for nothing.
  * The variable is applied to the page's outermost element, so it exists only on `/`.
  */
 const InstrumentSerifItalic = localFont({

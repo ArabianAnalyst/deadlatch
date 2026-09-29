@@ -1,5 +1,19 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import AuditForm from "@/components/AuditForm";
+
+/**
+ * The italic display face for the hero's `outside policy`. Declared page-locally, the same
+ * way the homepage does it, so the 22 KiB file loads on `/` and `/audit` and on no other route.
+ * Without it the browser slants the regular cut into a faux italic.
+ */
+const InstrumentSerifItalic = localFont({
+  src: [{ path: "../fonts/InstrumentSerif-Italic.woff2", weight: "400", style: "italic" }],
+  variable: "--font-serif-italic",
+  display: "optional",
+  preload: true,
+  adjustFontFallback: "Times New Roman",
+});
 
 export const metadata: Metadata = {
   title: "Agent Payment Security Audit — Deadlatch",
@@ -9,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function AuditPage() {
   return (
-    <main className="wrap logwrap wide">
+    <main className={`wrap logwrap wide ${InstrumentSerifItalic.variable}`}>
       <header className="log-hd af-hero">
         <div className="eyebrow">Agent payment security audit</div>
         <h1>Can a compromised agent move money <em>outside policy</em>?</h1>
