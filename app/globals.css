@@ -1515,9 +1515,11 @@ footer {
 .try-curl summary { cursor: pointer; color: var(--faint); font-size: 0.78rem; margin-top: 6px; }
 .try-curl pre { margin: 6px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: 0.76rem; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
 .try-anchor { margin: 10px 0 14px; }
+.try-anchor p { overflow-wrap: anywhere; }
 .try-cta { margin-top: 16px; }
 .try-paused { color: var(--muted); font-size: .95rem; }
 .try-own { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.try-broker { overflow-wrap: anywhere; }
 
 /* proof */
 section.proof { padding-top: 0; padding-bottom: 28px; border-top: 0; }

@@ -190,17 +190,19 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
       if (!seen.error) setFlags((prev) => (seen.error && prev ? prev : seen));
       const known = new Set((seen.flags ?? []).map((f) => f.id));
       const started = Date.now();
+      let last: FlagsDoc = seen;
       setWatchNote("Watching for the flag. The monitor reads the chain every fifteen seconds.");
       for (let t = 0; t < 18; t++) {
         await wait(5000);
         if (!mounted.current) return;
         const doc = await get<FlagsDoc>("/api/try/flags");
+        last = doc;
         setFlags((prev) => (!doc.error || !prev ? doc : prev));
         setWatchError(doc.error ? plain(doc.error) : null);
         const fresh = (doc.flags ?? []).find((f) => !known.has(f.id));
         if (fresh) { setWatchNote(`Flagged ${Math.round((Date.now() - started) / 1000)} seconds after the fifth spend.`); return; }
       }
-      setWatchNote("No flag inside ninety seconds. The monitor may be behind, the panel keeps the last state it had.");
+      if (!last.paused) setWatchNote("No flag inside ninety seconds. The monitor may be behind, the panel keeps the last state it had.");
     } finally {
       busyRef.current = false;
       setBusy(false);
@@ -284,7 +286,7 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
           ))}
         </div>
         <p className="try-cta"><a className="try-own" href="/app">Point your own broker at this ↗</a></p>
-        <p className="app-muted mono">broker {brokerUrl} · witness {witnessUrl}</p>
+        <p className="app-muted mono try-broker">broker {brokerUrl} · witness {witnessUrl}</p>
       </section>
     </div>
   );
