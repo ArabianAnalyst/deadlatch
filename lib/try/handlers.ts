@@ -23,7 +23,13 @@ function fail(e: unknown): Reply {
 }
 
 async function limited(deps: TryDeps, ip: string, bucket: "" | ":status", limit: number): Promise<Reply | null> {
-  const t = await take(deps.db, keyFor(ip) + bucket, limit, deps.now?.());
+  let t;
+  try {
+    t = await take(deps.db, keyFor(ip) + bucket, limit, deps.now?.());
+  } catch (e) {
+    console.error("try limiter unavailable", e);
+    return null;
+  }
   return t.ok ? null : { status: 429, body: { error: LIMITED, retryAfterSec: t.retryAfterSec } };
 }
 
@@ -130,5 +136,8 @@ export async function flags(deps: TryDeps): Promise<Reply> {
   try {
     const w = await publicWatch(deps.db, deps.env.projectId, deps.now?.());
     return { status: 200, cacheSec: 3, body: w };
-  } catch { return { status: 502, body: { error: "flags unavailable" } }; }
+  } catch (e) {
+    console.error("try flags unavailable", e);
+    return { status: 200, cacheSec: 3, body: { paused: true, monitor: { state: "never", cursorSeq: null }, flags: [] } };
+  }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { testDb } from "@/lib/db/test";
 import { projects } from "@/lib/db/schema";
 import { request, execute, status, chain, anchor, flags, type TryDeps } from "@/lib/try/handlers";
@@ -69,6 +69,14 @@ describe("request", () => {
     const down = { ...deps, fetch: fakeFetch(() => { throw new TypeError("fetch failed"); }) };
     expect(await request(down, "ip", { preset: "allowed" })).toEqual({ status: 502, body: { error: "playground broker unreachable" } });
   });
+  it("lets the call through and logs when the limiter's database throws", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const broken = { ...deps, db: { insert() { throw new Error("db down"); } } as unknown as Db };
+    const r = await request(broken, "ip", { preset: "off-list" });
+    expect(r.body).toMatchObject({ decision: "denied", explain: { rule: "allowlist-miss" } });
+    expect(spy).toHaveBeenCalledWith("try limiter unavailable", expect.any(Error));
+    spy.mockRestore();
+  });
 });
 
 describe("execute and status", () => {
@@ -130,9 +138,15 @@ describe("reads", () => {
     expect(r.cacheSec).toBe(3);
     expect(r.body).toMatchObject({ monitor: { state: "never" }, flags: [] });
   });
-  it("flags answers 502 when the database read fails", async () => {
+  it("flags pauses instead of failing, and logs, when the database read fails", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const broken = { ...deps, db: { select() { throw new Error("db down"); } } as unknown as Db };
-    expect(await flags(broken)).toEqual({ status: 502, body: { error: "flags unavailable" } });
+    expect(await flags(broken)).toEqual({
+      status: 200, cacheSec: 3,
+      body: { paused: true, monitor: { state: "never", cursorSeq: null }, flags: [] },
+    });
+    expect(spy).toHaveBeenCalledWith("try flags unavailable", expect.any(Error));
+    spy.mockRestore();
   });
   it("chain against an empty stream returns no head and no records", async () => {
     const empty = { ...deps, fetch: fakeFetch((url) => (url.includes("/chain") ? json({ stream: "playground", total: 0, head: null, since: 0, count: 0, records: [] }) : json({ error: "not found" }, 404))) };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { minutesAgo } from "@/lib/home/format";
 
 type Preset = "allowed" | "held" | "over-cap" | "off-list";
 interface Decision { decision?: string; reason?: string; grantId?: string; pendingId?: string; explain?: { rule?: string; policyVersion?: string }; curl?: string; error?: string; retryAfterSec?: number }
@@ -11,7 +12,7 @@ interface Env { seq: number; id: string; ts: string; kind: string; payload: { st
 interface ChainDoc { total: number; head: { seq: number; hash: string } | null; records: Env[]; error?: string }
 interface AnchorDoc { stream: string; total: number; head: { seq: number; hash: string } | null; lastAnchor: { seq: number; head: string; at: string; logIndex: string; logUrl: string; logHost: string | null } | null; verify: { ok: boolean; coveredUpTo: number | null; reason: string | null }; verifyCommand: string; error?: string }
 interface FlagRow { id: string; expectationId: string; reason: string; ref: { seq: number }; payee: string | null; amount: string | null; at: string; window?: { count?: number } }
-interface FlagsDoc { monitor: { state: "never" | "ok" | "amber" | "red"; cursorSeq: number | null }; flags: FlagRow[]; error?: string }
+interface FlagsDoc { monitor: { state: "never" | "ok" | "amber" | "red"; cursorSeq: number | null }; flags: FlagRow[]; paused?: boolean; error?: string }
 
 const BUTTONS: { preset: Preset; label: string }[] = [
   { preset: "allowed", label: "Pay $12.50" },
@@ -243,7 +244,7 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
           <div className="try-anchor">
             <p className="mono">Head at seq {anchor.head?.seq ?? "none"}{anchor.head ? `, hash ${short(anchor.head.hash)}` : ""}.</p>
             {anchor.lastAnchor ? (
-              <p className="mono">Last anchored at seq {anchor.lastAnchor.seq}, entry {anchor.lastAnchor.logIndex} in {anchor.lastAnchor.logHost ?? "the log"}, {Math.max(0, Math.round((Date.now() - Date.parse(anchor.lastAnchor.at)) / 60000))} minutes ago.</p>
+              <p className="mono">Last anchored at seq {anchor.lastAnchor.seq}, entry {anchor.lastAnchor.logIndex} in {anchor.lastAnchor.logHost ?? "the log"}, {minutesAgo(anchor.lastAnchor.at)}.</p>
             ) : <p className="mono">No anchor yet. The witness anchors every five minutes.</p>}
             <p className={anchor.verify.ok ? "mono" : "app-error mono"}>verifyAnchored {anchor.verify.ok ? "ok" : "failed"}{covered !== null ? `, covered up to seq ${covered}` : ""}{anchor.verify.reason ? `, ${anchor.verify.reason}` : ""}.</p>
             {myTop !== null && covered !== null && myTop > covered && <p className="try-note">Your receipt is {myTop - covered} past the last anchor. The witness anchors every five minutes.</p>}
@@ -265,7 +266,9 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
 
       <section className="app-card try-panel">
         <div className="eyebrow">Watch</div>
-        {watchError && <p className="app-error mono">{watchError}</p>}
+        {flags?.paused ? (
+          <p className="try-paused">Watch is paused. The monitor is still running, its flags will show here when the dashboard is back.</p>
+        ) : watchError && <p className="app-error mono">{watchError}</p>}
         {flags && flags.monitor && (
           <div className="app-status"><span className={`app-dot ${flags.monitor.state}`} aria-hidden="true" /><div><div className="app-status-label">{STATE_LABEL[flags.monitor.state]}</div><div className="mono app-muted">{flags.monitor.cursorSeq !== null ? `cursor ${flags.monitor.cursorSeq}` : "no cursor yet"}</div></div></div>
         )}
@@ -280,7 +283,7 @@ export default function Playground({ brokerUrl, witnessUrl }: { brokerUrl: strin
             </article>
           ))}
         </div>
-        <p className="try-cta"><a className="btn" href="/app">Point your own broker at this. Three lines of config.</a></p>
+        <p className="try-cta"><a className="try-own" href="/app">Point your own broker at this ↗</a></p>
         <p className="app-muted mono">broker {brokerUrl} · witness {witnessUrl}</p>
       </section>
     </div>
