@@ -10,13 +10,15 @@ export const metadata: Metadata = {
 export default function AuditPage() {
   return (
     <main className="wrap logwrap wide">
-      <header className="log-hd">
-        <div className="eyebrow">Agent Payment Security Audit</div>
-        <h1>Can a compromised agent move money outside policy?</h1>
-        <p>Nine questions about your agent&apos;s payment setup, scored on eight dimensions. Anything you leave out comes back as Unknown with the exact question to ask. The blast radius is in your own numbers. This is a diagnostic, not a sales tool.</p>
-        <p className="mono af-cli">npx @olurabian/audit</p>
+      <header className="log-hd af-hero">
+        <div className="eyebrow">Agent payment security audit</div>
+        <h1>Can a compromised agent move money <em>outside policy</em>?</h1>
+        <p>Nine questions about how your agent pays. The verdict builds as you answer, across eight dimensions. Leave anything you do not know, it comes back as the exact question to ask your team.</p>
+        <div className="af-trust"><span className="af-dot" aria-hidden="true" />Runs entirely in your browser. Nothing you type is sent anywhere.</div>
       </header>
-      <AuditForm />
+      <AuditForm>
+        <span className="af-cli">or run it locally with npx @olurabian/audit</span>
+      </AuditForm>
     </main>
   );
 }
