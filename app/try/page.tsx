@@ -12,7 +12,7 @@ export default function TryPage() {
   const witnessUrl = process.env.TRY_WITNESS_URL ?? "";
   const configured = Boolean(brokerUrl && witnessUrl && process.env.TRY_PROJECT_ID && process.env.TRY_LOG_KEY);
   return (
-    <main className="wrap logwrap app try">
+    <main className="wrap logwrap wide app try">
       <header className="log-hd">
         <div className="eyebrow">The playground</div>
         <h1>Press a button. A real broker decides.</h1>

@@ -1074,14 +1074,18 @@ a.signal:hover {
   position: relative;
   z-index: 1;
 }
+.logwrap.wide {
+  max-width: 1120px;
+}
 .log-hd {
   margin-bottom: 40px;
 }
 .log-hd h1 {
-  font-size: clamp(2rem, 4.5vw, 2.9rem);
-  letter-spacing: -0.025em;
-  line-height: 1.04;
-  font-weight: 640;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
   margin-top: 14px;
   text-wrap: balance;
 }
@@ -1137,7 +1141,7 @@ a.signal:hover {
   font-size: 0.94rem;
 }
 .log-arrow {
-  color: var(--allow);
+  color: var(--accent);
   font-family: var(--mono);
   align-self: center;
 }
@@ -1162,10 +1166,11 @@ a.signal:hover {
   margin-bottom: 12px;
 }
 .log-article-head h1 {
-  font-size: clamp(2rem, 4.5vw, 2.8rem);
-  letter-spacing: -0.025em;
-  line-height: 1.06;
-  font-weight: 640;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.6vw, 3.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
   text-wrap: balance;
   color: var(--ink);
 }
@@ -1186,9 +1191,10 @@ a.signal:hover {
   font-style: italic;
 }
 .prose h2 {
-  font-size: 1.48rem;
+  font-family: var(--serif);
+  font-size: 1.6rem;
   color: var(--ink);
-  font-weight: 640;
+  font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.2;
   margin: 40px 0 14px;
@@ -1217,18 +1223,18 @@ a.signal:hover {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--allow);
+  background: var(--accent);
 }
 .prose li strong {
   color: var(--ink);
 }
 .prose a {
-  color: var(--allow);
-  text-decoration: none;
-  border-bottom: 1px solid var(--allow-ln);
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .prose a:hover {
-  border-bottom-color: var(--allow);
+  color: var(--ink);
 }
 .prose img {
   display: block;
@@ -1487,7 +1493,7 @@ footer {
 .app-hash { font-size: 0.8rem; }
 .app-list { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.86rem; line-height: 1.7; }
 /* try */
-.try .try-strip { color: var(--muted); border-left: 3px solid var(--hold); padding: 6px 0 6px 14px; margin: 12px 0 0; max-width: 72ch; }
+.try .try-strip { color: var(--muted); font-family: var(--sans); border-left: 3px solid var(--accent); padding: 6px 0 6px 14px; margin: 12px 0 0; max-width: 72ch; }
 .try-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 20px; }
 @media (min-width: 1100px) { .try-grid { grid-template-columns: 1fr 1fr 1fr; } }
 .try-panel { min-width: 0; }

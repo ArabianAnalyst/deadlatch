@@ -216,6 +216,29 @@ describe("every tested selector still exists", () => {
   });
 });
 
+describe("inner pages wear the skin", () => {
+  for (const sel of [".log-hd h1", ".log-article-head h1", ".prose h2"]) {
+    it(`${sel} is the serif at weight 400`, () => {
+      expect(bodyOf(sel), sel).toMatch(/font-family:\s*var\(--serif\)/);
+      expect(bodyOf(sel), sel).toMatch(/font-weight:\s*400/);
+    });
+  }
+  for (const sel of [".log-arrow", ".prose a", ".prose a:hover", ".prose li::before", ".try .try-strip"]) {
+    it(`${sel} carries no brand green or amber`, () => {
+      const body = bodyOf(sel);
+      expect(body, `${sel} not found`).not.toBe("");
+      expect(body).not.toMatch(GREEN);
+      expect(body).not.toMatch(/var\(--hold\)/);
+    });
+  }
+  it("links in prose are underlined", () => {
+    expect(bodyOf(".prose a")).toMatch(/text-decoration:\s*underline/);
+  });
+  it("wide pages have their own width", () => {
+    expect(bodyOf(".logwrap.wide")).toMatch(/max-width:\s*1120px/);
+  });
+});
+
 /** The stylesheet claimed 70px of section padding for weeks and never delivered it: `.wrap { padding: 0 24px }` outranked `section { … }`. The rule that applies must outrank .wrap. */
 describe("section rhythm", () => {
   it("gives every wrapped section vertical padding through a selector that beats .wrap", () => {

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AuditPage() {
   return (
-    <main className="wrap logwrap">
+    <main className="wrap logwrap wide">
       <header className="log-hd">
         <div className="eyebrow">Agent Payment Security Audit</div>
         <h1>Can a compromised agent move money outside policy?</h1>
