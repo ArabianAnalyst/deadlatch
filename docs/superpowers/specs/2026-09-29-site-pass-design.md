@@ -100,3 +100,15 @@ Console errors on load are 0 in the browser on both viewports on all four routes
 No horizontal scroll on any of the four routes at 1440 or 390. `scrollWidth` equals `clientWidth` in every case.
 
 The `/try` press-buttons gate, "the broker answers" when the database refuses, was not measured here. The brief for this task says press nothing on `/try` and measure the page at rest only, so the request-side behavior of the rate limiter and the execute handler under a refusing database is left to its own test coverage (`test/try-handlers.test.ts`) and to the production check after the release Go.
+
+### Weight misses closed
+
+The two misses above had one cause the table did not name. The brand link in the site nav prefetched `/` on every inner page. That prefetch pulled three homepage payloads, about 15 KiB, and the italic serif the homepage declares, 22 KiB, onto pages that never render either. The brand link now carries `prefetch={false}`, the same rule the App link already follows, and `test/site-nav-prefetch.test.ts` holds it. Re-measured with the same method after the change.
+
+| Route | A11y | Best practices | SEO | CLS | Weight | Weight gate |
+|---|---|---|---|---|---|---|
+| `/try` | 100 | 100 | 100 | 0 | 281 KiB | ≤ 300 KiB, pass |
+| `/audit` | 100 | 100 | 100 | 0 | 267 KiB | ≤ 310 KiB, pass |
+| `/log` | 100 | 100 | 100 | 0 | 279 KiB | ≤ 300 KiB, pass |
+
+The italic and the homepage payloads no longer appear in the request list of any of the three routes. Clicking the logo still navigates normally, it simply fetches the homepage on hover or click instead of on load.

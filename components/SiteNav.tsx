@@ -16,7 +16,10 @@ function Lock() {
 
 type NavLink = { href: string; label: string; anchor?: boolean; prefetch?: false };
 
-/** The App link is never prefetched. Prefetching it follows a redirect into the sign-in host and logs a cross-origin error on every page. */
+/**
+ * The App link is never prefetched. Prefetching it follows a redirect into the sign-in host and logs a cross-origin error on every page.
+ * The brand link below is never prefetched either. Prefetching `/` pulls the homepage payload and its italic serif, about 36 KiB on every inner page.
+ */
 const LINKS: NavLink[] = [
   { href: "/try", label: "Try" },
   { href: "/#stack", label: "Stack", anchor: true },
@@ -58,7 +61,7 @@ export default function SiteNav() {
   return (
     <nav>
       <div className="wrap nav-in">
-        <Link className="brand" href="/" aria-label="Deadlatch home">
+        <Link className="brand" href="/" prefetch={false} aria-label="Deadlatch home">
           <Lock />
           deadlatch
         </Link>
