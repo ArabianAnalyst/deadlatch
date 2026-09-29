@@ -1,0 +1,264 @@
+<title>Deadlatch Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:dark;
+    --ground:#0a0c10; --panel:#11151b; --panel2:#161b22; --line:#242b35; --line2:#2e3742;
+    --ink:#e8edf3; --muted:#8a94a2; --faint:#7c8798; --accent:#7c93ff;
+    --closed:#37d07e; --partial:#f2b33d; --exposed:#fb5b4b; --unknown:#8a94a2;
+    --serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+    --sans:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.55;
+       padding-inline:clamp(16px,4vw,40px);padding-block:0 110px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  button{font:inherit;cursor:pointer}
+
+  nav{display:flex;align-items:center;gap:22px;height:60px;border-bottom:1px solid var(--line)}
+  .brand{font-family:var(--serif);font-size:22px}
+  .nl{display:flex;gap:18px;color:var(--muted);font-size:14px}
+  .nl b{color:var(--ink);font-weight:500}
+
+  .hero{padding-block:30px 18px;display:grid;gap:12px;max-width:800px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,4.4vw,54px);line-height:1;margin:0;text-wrap:balance}
+  h1 em{color:var(--accent)}
+  .lede{color:var(--muted);font-size:17px;margin:0;max-width:62ch}
+  .trust{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--closed);flex:none}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .btn{border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:8px;padding:10px 16px;font-size:14px}
+  .btn.primary{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+  .btn:hover{border-color:var(--muted)}
+  .cli{font-family:var(--mono);font-size:13px;color:var(--faint)}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:28px;align-items:start;margin-top:4px}
+
+  .qhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .qhead h2{font-family:var(--serif);font-weight:400;font-size:28px;margin:0}
+  .progress{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .bar{height:3px;background:var(--line);border-radius:3px;margin-bottom:16px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+  .exnote{font-size:13px;color:var(--partial);margin:-6px 0 14px}
+
+  .q{border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:10px}
+  .q.open{border-color:var(--line2)}
+  .q-h{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:14px 16px}
+  .q-n{font-family:var(--mono);font-size:12px;color:var(--faint);width:22px}
+  .q-t{flex:1;font-size:16px;font-weight:500}
+  .state{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
+  .state.done{color:var(--closed);border-color:#37d07e55}
+  .chev{color:var(--faint);transition:transform .2s}
+  .q.open .chev{transform:rotate(90deg)}
+  .q-b{padding:0 16px 16px 50px;display:none}
+  .q.open .q-b{display:grid;gap:12px}
+  .prompt{color:var(--muted);margin:0;font-size:14.5px}
+  .f{display:grid;gap:5px}
+  .f label{font-size:13.5px;color:var(--ink)}
+  .f label small{color:var(--faint)}
+  input,select{font:inherit;font-size:14.5px;color:var(--ink);background:var(--ground);border:1px solid var(--line2);border-radius:7px;padding:9px 11px;width:100%}
+  input::placeholder{color:#5c6674}
+  select.unk{color:var(--faint);font-style:italic}
+  .addnote{justify-self:start;background:none;border:0;color:var(--accent);font-size:13.5px;padding:0}
+  .next{justify-self:end;background:none;border:1px solid var(--line2);color:var(--ink);border-radius:7px;padding:7px 12px;font-size:13.5px}
+
+  .rd{position:sticky;top:16px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);padding:20px}
+  .rd-k{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .posture{font-family:var(--serif);font-size:27px;line-height:1.12;margin:6px 0 16px}
+  .dims{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:6px}
+  .dim{border:1px solid var(--line);border-radius:7px;padding:8px 8px 7px;background:var(--panel2);min-height:62px;display:flex;flex-direction:column;justify-content:space-between}
+  .dim span{font-size:11.5px;line-height:1.2;color:var(--ink)}
+  .dim b{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.04em}
+  .dim.Closed{border-color:#37d07e55} .dim.Closed b{color:var(--closed)}
+  .dim.Partial{border-color:#f2b33d55} .dim.Partial b{color:var(--partial)}
+  .dim.Exposed{border-color:#fb5b4b66} .dim.Exposed b{color:var(--exposed)}
+  .dim.Unknown b{color:var(--unknown)}
+  .tally{display:flex;gap:14px;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:16px;font-variant-numeric:tabular-nums}
+  .tally .x{color:var(--exposed)} .tally .c{color:var(--closed)} .tally .p{color:var(--partial)}
+  .sec{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+  .threats{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .th{font-family:var(--mono);font-size:12px;padding:4px 9px;border-radius:999px;border:1px solid var(--line2)}
+  .th.open{color:var(--exposed);border-color:#fb5b4b66} .th.closed{color:var(--closed);border-color:#37d07e55} .th.unknown{color:var(--muted)}
+  .why{font-size:13.5px;color:var(--muted);margin:8px 0 0}
+  .blast{font-size:14.5px;margin:6px 0 0}
+  .blast strong{color:var(--exposed);font-weight:500}
+  ol.path{margin:8px 0 0;padding-left:18px;display:grid;gap:7px;font-size:13.5px;color:var(--ink)}
+  ol.path li::marker{color:var(--accent);font-family:var(--mono)}
+  .unk-q{font-size:13.5px;color:var(--muted);margin:6px 0 0}
+  .rd-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .copied{font-size:12.5px;color:var(--closed);align-self:center}
+
+  .mbar{display:none}
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr}
+    .rd{position:static}
+    .nl{display:none}
+    .q-b{padding-left:16px}
+    .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+          background:#0e1116;border-top:1px solid var(--line2);gap:12px;align-items:center;z-index:5}
+    .mbar .t{flex:1;font-size:13px;line-height:1.3}
+    .mbar .t b{display:block;font-family:var(--serif);font-weight:400;font-size:17px}
+  }
+  @media (max-width:460px){ .dims{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+  <nav><span class="brand">deadlatch</span><div class="nl"><span>Try</span><span>Stack</span><span>Why open</span><span><b>Audit</b></span><span>Log</span></div></nav>
+
+  <header class="hero">
+    <div class="eyebrow">Agent payment security audit</div>
+    <h1>Can a compromised agent move money <em>outside policy</em>?</h1>
+    <p class="lede">Nine questions about how your agent pays. The verdict builds as you answer, across eight dimensions. Leave anything you do not know, it comes back as the exact question to ask your team.</p>
+    <div class="trust"><span class="dot"></span>Runs entirely in your browser. Nothing you type is sent anywhere.</div>
+    <div class="actions">
+      <button class="btn primary" id="ex" type="button">Load an example agent</button>
+      <button class="btn" id="clr" type="button">Start blank</button>
+      <span class="cli" style="align-self:center">or run it locally with npx @olurabian/audit</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="qhead"><h2>Your setup</h2><span class="progress" id="prog">0 of 9 answered</span></div>
+      <div class="bar"><i id="barfill"></i></div>
+      <p class="exnote" id="exnote" hidden>Example agent loaded. A common setup, a rail key in the runtime and caps that bite only at settlement. Edit any answer and watch the verdict move.</p>
+      <div id="qs"></div>
+    </div>
+
+    <aside class="rd" id="rd" aria-live="polite">
+      <div class="rd-k">Live verdict</div>
+      <div class="posture" id="posture"></div>
+      <div class="dims" id="dims"></div>
+      <div class="tally" id="tally"></div>
+      <div class="sec"><div class="rd-k">What an attacker can do</div><div class="threats" id="threats"></div><p class="why" id="why"></p></div>
+      <div class="sec" id="blastsec"><div class="rd-k">Blast radius</div><p class="blast" id="blast"></p></div>
+      <div class="sec" id="pathsec"><div class="rd-k">Shortest path to closed</div><ol class="path" id="path"></ol></div>
+      <div class="sec" id="unksec"><div class="rd-k">Ask your team first</div><p class="unk-q" id="unk"></p></div>
+      <div class="rd-actions"><button class="btn primary" id="copy" type="button">Copy report as markdown</button><span class="copied" id="copied" hidden>Copied</span></div>
+    </aside>
+  </div>
+</div>
+
+<div class="mbar" id="mbar"><div class="t"><b id="mpost"></b><span id="mtally"></span></div><button class="btn" type="button" onclick="document.getElementById('rd').scrollIntoView({behavior:'smooth'})">See verdict</button></div>
+
+<script>/*ENGINE*/</script>
+<script>
+(function(){
+  const A = Audit;
+  const Q = A.questions, LABEL = A.DIMENSION_LABEL;
+  let answers = {}, openId = Q[0].id, noteOpen = {};
+
+  function fromIntake(it){
+    const a = {};
+    for (const q of Q){ const src = it[q.id] || {}; const o = {};
+      for (const f of q.fields){ const v = src[f.key];
+        if (v === undefined || v === "unknown") continue;
+        if (f.kind === "list") o[f.key] = v.join(", ");
+        else if (f.kind === "money") o[f.key] = (v.currency === "USD" ? "$" : v.currency === "GBP" ? "£" : "") + v.amount + (["USD","GBP"].includes(v.currency) ? "" : " " + v.currency);
+        else if (f.kind === "boolean") o[f.key] = v ? "yes" : "no";
+        else o[f.key] = String(v);
+      }
+      if (src.notes) { o.notes = src.notes; noteOpen[q.id] = true; }
+      a[q.id] = o; }
+    return a;
+  }
+  function toIntake(a){
+    const out = {};
+    for (const q of Q){ const raw = a[q.id] || {}; const obj = {}; let any = false;
+      for (const f of q.fields){ const v = (raw[f.key] || "").trim();
+        if (f.kind === "choice"){ obj[f.key] = v || "unknown"; if (v) any = true; }
+        else if (f.kind === "list"){ obj[f.key] = v ? v.split(",").map(s=>s.trim()).filter(Boolean) : "unknown"; if (v) any = true; }
+        else if (f.kind === "boolean"){ obj[f.key] = v === "yes" ? true : v === "no" ? false : "unknown"; if (v) any = true; }
+        else if (f.kind === "number"){ obj[f.key] = v && isFinite(+v) ? +v : "unknown"; if (v) any = true; }
+        else if (f.kind === "money"){ const m = v.match(/^([£$€])?\s*([0-9]+(?:\.[0-9]+)?)\s*([A-Za-z]{3})?$/); if (m){ const sym={"£":"GBP","$":"USD","€":"EUR"}; obj[f.key] = {amount:+m[2], currency:(m[3] || (m[1] ? sym[m[1]] : "") || "USD").toUpperCase()}; any = true; } }
+        else if (v){ obj[f.key] = v; any = true; }
+      }
+      const n = (raw.notes || "").trim(); if (n){ obj.notes = n; any = true; }
+      if (any) out[q.id] = obj; }
+    return out;
+  }
+  const answered = q => Object.entries(answers[q.id] || {}).some(([k,v]) => k !== "notes" && String(v).trim());
+
+  function field(q, f){
+    const id = q.id + "-" + f.key, v = (answers[q.id] || {})[f.key] || "";
+    const lab = '<label for="'+id+'">'+f.label+(f.optional ? ' <small>optional</small>' : '')+'</label>';
+    if (f.kind === "choice" || f.kind === "boolean"){
+      const opts = f.kind === "boolean" ? [{value:"yes",label:"Yes"},{value:"no",label:"No"}] : f.choices.filter(c=>c.value!=="unknown");
+      return '<div class="f">'+lab+'<select id="'+id+'" data-q="'+q.id+'" data-k="'+f.key+'" class="'+(v?'':'unk')+'"><option value="">Unknown, ask me later</option>'+
+        opts.map(c=>'<option value="'+c.value+'"'+(c.value===v?' selected':'')+'>'+c.label+'</option>').join("")+'</select></div>';
+    }
+    const ph = f.kind === "money" ? "for example $50 or 50 GBP" : f.kind === "list" ? "separate with commas" : f.kind === "number" ? "a number" : "";
+    return '<div class="f">'+lab+'<input id="'+id+'" data-q="'+q.id+'" data-k="'+f.key+'" value="'+v.replace(/"/g,"&quot;")+'" placeholder="'+ph+'" autocomplete="off"></div>';
+  }
+  function renderQs(){
+    document.getElementById("qs").innerHTML = Q.map((q,i) => {
+      const done = answered(q), open = q.id === openId, notes = (answers[q.id]||{}).notes || "";
+      return '<div class="q'+(open?' open':'')+'"><button type="button" class="q-h" data-open="'+q.id+'" aria-expanded="'+open+'">'+
+        '<span class="q-n">'+String(i+1).padStart(2,"0")+'</span><span class="q-t">'+q.title+'</span>'+
+        '<span class="state'+(done?' done':'')+'">'+(done?'answered':'unknown')+'</span><span class="chev">›</span></button>'+
+        '<div class="q-b"><p class="prompt">'+q.prompt+'</p>'+q.fields.map(f=>field(q,f)).join("")+
+        (noteOpen[q.id] ? '<div class="f"><label for="'+q.id+'-notes">Note <small>shown in the report, never scored</small></label><input id="'+q.id+'-notes" data-q="'+q.id+'" data-k="notes" value="'+notes.replace(/"/g,"&quot;")+'"></div>'
+                        : '<button type="button" class="addnote" data-note="'+q.id+'">+ Add a note</button>')+
+        (i < Q.length-1 ? '<button type="button" class="next" data-open="'+Q[i+1].id+'">Next, '+Q[i+1].title.toLowerCase()+' ›</button>' : '')+
+        '</div></div>';
+    }).join("");
+  }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  function renderReadout(){
+    const r = A.score(toIntake(answers));
+    const n = Q.filter(answered).length;
+    document.getElementById("prog").textContent = n + " of 9 answered";
+    document.getElementById("barfill").style.width = (n/9*100) + "%";
+    const post = r.posture.charAt(0).toUpperCase() + r.posture.slice(1);
+    document.getElementById("posture").textContent = post;
+    document.getElementById("dims").innerHTML = r.exposure.map(e => '<div class="dim '+e.verdict+'" title="'+esc(e.finding)+'"><span>'+LABEL[e.dimension]+'</span><b>'+e.verdict.toUpperCase()+'</b></div>').join("");
+    const c = v => r.exposure.filter(e=>e.verdict===v).length;
+    const t = '<span class="x">'+c("Exposed")+' exposed</span><span class="p">'+c("Partial")+' partial</span><span class="c">'+c("Closed")+' closed</span><span>'+c("Unknown")+' unknown</span>';
+    document.getElementById("tally").innerHTML = t;
+    const th = (k,l) => '<span class="th '+r.open[k]+'">'+l+' '+r.open[k]+'</span>';
+    document.getElementById("threats").innerHTML = th("forgery","Forgery") + th("misdirection","Misdirection");
+    document.getElementById("why").textContent = r.open.why;
+    const b = r.topBreaches[0];
+    document.getElementById("blastsec").hidden = !b;
+    if (b) document.getElementById("blast").innerHTML = '<strong>'+esc(b.blastRadius)+'</strong>';
+    document.getElementById("pathsec").hidden = !r.shortestPath.length;
+    document.getElementById("path").innerHTML = r.shortestPath.map(s=>'<li>'+esc(s.step)+'</li>').join("");
+    const unk = r.exposure.filter(e=>e.verdict==="Unknown");
+    document.getElementById("unksec").hidden = !unk.length;
+    document.getElementById("unk").textContent = unk.length ? unk[0].question + (unk.length>1 ? "  (+" + (unk.length-1) + " more in the report)" : "") : "";
+    document.getElementById("mpost").textContent = post;
+    document.getElementById("mtally").textContent = c("Exposed")+" exposed, "+c("Closed")+" closed, "+c("Unknown")+" unknown";
+    window.__readout = r;
+  }
+  function all(){ renderQs(); renderReadout(); }
+
+  document.addEventListener("click", e => {
+    const o = e.target.closest("[data-open]"); if (o){ openId = openId === o.dataset.open && o.classList.contains("q-h") ? null : o.dataset.open; renderQs(); return; }
+    const nb = e.target.closest("[data-note]"); if (nb){ noteOpen[nb.dataset.note] = true; renderQs(); const i = document.getElementById(nb.dataset.note+"-notes"); if (i) i.focus(); }
+  });
+  function onEdit(e){ const t = e.target; if (!t.dataset || !t.dataset.q) return;
+    answers[t.dataset.q] = Object.assign({}, answers[t.dataset.q], {[t.dataset.k]: t.value});
+    if (t.tagName === "SELECT") t.classList.toggle("unk", !t.value);
+    renderReadout();
+    const q = Q.find(x=>x.id===t.dataset.q), st = document.querySelector('[data-open="'+q.id+'"].q-h .state');
+    if (st){ const d = answered(q); st.textContent = d ? "answered" : "unknown"; st.classList.toggle("done", d); }
+  }
+  document.addEventListener("input", onEdit); document.addEventListener("change", onEdit);
+
+  document.getElementById("ex").onclick = () => { noteOpen = {}; answers = fromIntake(A.exampleIntake()); openId = "limits"; document.getElementById("exnote").hidden = false; all(); };
+  document.getElementById("clr").onclick = () => { answers = {}; noteOpen = {}; openId = Q[0].id; document.getElementById("exnote").hidden = true; all(); };
+  document.getElementById("copy").onclick = () => {
+    const md = A.render(window.__readout, "markdown"), ok = () => { document.getElementById("copied").hidden = false; };
+    try { navigator.clipboard.writeText(md).then(ok, ()=>{}); } catch(e){}
+  };
+
+  answers = fromIntake(A.exampleIntake()); openId = "limits"; document.getElementById("exnote").hidden = false;
+  all();
+})();
+</script>
