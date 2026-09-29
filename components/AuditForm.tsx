@@ -133,7 +133,7 @@ export default function AuditForm({ children }: { children?: ReactNode }) {
 
       <div className="af-layout">
         <div className="af-main">
-          <div className="af-qhead"><h2>Your setup</h2><span className="af-progress">{done} of {questions.length} answered</span></div>
+          <div className="af-qhead"><h2>Your setup</h2><span className="af-progress" aria-live="polite" aria-atomic="true">{done} of {questions.length} answered</span></div>
           <div className="af-bar" aria-hidden="true"><i style={{ width: `${(done / questions.length) * 100}%` }} /></div>
           {isExample && <p className="af-exnote">Example agent loaded. A common setup, a rail key in the runtime and caps that bite only at settlement. Edit any answer and watch the verdict move.</p>}
 
@@ -167,9 +167,9 @@ export default function AuditForm({ children }: { children?: ReactNode }) {
           })}
         </div>
 
-        <aside className="af-rd" id="af-rd" aria-live="polite" aria-label="Live verdict">
+        <aside className="af-rd" id="af-rd" aria-label="Live verdict">
           <div className="af-rd-k">Live verdict</div>
-          <div className="af-posture">{posture}</div>
+          <div className="af-posture" aria-live="polite" aria-atomic="true">{posture}</div>
           <div className="af-dims">
             {readout.exposure.map((e) => (
               <div key={e.dimension} className={"dim af-dim " + e.verdict} title={e.finding}>

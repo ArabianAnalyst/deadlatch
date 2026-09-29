@@ -1420,7 +1420,7 @@ footer {
 .af-next{justify-self:end;background:none;border:1px solid var(--line2);color:var(--ink);border-radius:7px;padding:7px 12px;font:inherit;font-size:.85rem;cursor:pointer}
 .af-next:hover{border-color:#3b4552}
 
-.af-rd{position:sticky;top:76px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);padding:20px;scroll-margin-top:76px}
+.af-rd{position:sticky;top:76px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);padding:20px;scroll-margin-top:76px;max-height:calc(100vh - 92px);overflow-y:auto}
 .af-rd-k{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .af-posture{font-family:var(--serif);font-size:1.7rem;line-height:1.12;margin:6px 0 16px}
 .af-dims{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:6px}
@@ -1452,7 +1452,7 @@ footer {
 .af-mbar{display:none}
 @media (max-width:900px){
   .af-layout{grid-template-columns:1fr}
-  .af-rd{position:static}
+  .af-rd{position:static;max-height:none;overflow-y:visible}
   .af-q-b{padding-left:16px}
   .af-mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
     background:#0e1116;border-top:1px solid var(--line2);gap:12px;align-items:center}
@@ -1460,6 +1460,7 @@ footer {
   .af-mbar-t b{display:block;font-family:var(--serif);font-weight:400;font-size:1.06rem;color:var(--ink)}
   .af-mbar .btn{flex:none}
   body:has(.af-mbar){padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))}
+  html:has(.af-mbar){scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 }
 @media (max-width:460px){.af-dims{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.af-bar i,.af-chev{transition:none}}

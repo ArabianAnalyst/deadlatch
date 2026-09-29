@@ -16,8 +16,12 @@ describe("AuditForm", () => {
   it("offers the example and a blank start, and keeps both report outputs", () => {
     for (const s of ["Load an example agent", "Start blank", "Copy report as markdown", "Save as HTML"]) expect(html).toContain(s);
   });
+  it("announces only the verdict sentence and the answered count", () => {
+    expect(html).not.toMatch(/<aside[^>]*aria-live/);
+    expect(html.match(/aria-live="polite"/g)).toHaveLength(2);
+  });
   it("never sends what the visitor types anywhere", () => {
     const src = fs.readFileSync(new URL("../components/AuditForm.tsx", import.meta.url), "utf8");
-    expect(src).not.toMatch(/\bfetch\s*\(|XMLHttpRequest|navigator\.sendBeacon/);
+    expect(src).not.toMatch(/\bfetch\s*\(|XMLHttpRequest|navigator\.sendBeacon|\bimport\s*\(|new\s+Image\s*\(/);
   });
 });
