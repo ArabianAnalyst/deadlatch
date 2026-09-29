@@ -48,7 +48,7 @@ Deadlatch's monitor exists to keep those two states apart. A monitor running bes
 
 ## Place your own
 
-Take the control your team leans on most and walk it up the scale. Is it written down. Is it switched on. Has anyone pushed the bad case through it on purpose. Has it ever caught one for real.
+Take the control your team leans on most and walk it up the scale. Is it written down? Is it switched on? Has anyone pushed the bad case through it on purpose? Has it ever caught one for real?
 
 A control you have never watched fire is a hope.
 
