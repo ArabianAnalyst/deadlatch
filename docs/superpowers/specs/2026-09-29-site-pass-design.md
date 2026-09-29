@@ -77,3 +77,26 @@ Measured on the production deploy after release, Lighthouse 12 mobile, same meth
 - `test/home-tokens.test.ts` brand-green list extends to the D1 selectors, and asserts the serif on `.log-hd h1` and `.log-article-head h1`.
 - `test/audit-form.test.ts`, new, renders `AuditForm` with `react-dom/server` and asserts the example posture sentence is present on first render, eight dimension cells exist, and no `fetch` appears in the component source.
 - `test/log-posts.test.ts`, new, asserts both new posts parse with title, date and description, and their bodies contain no colon followed by a space outside code and URLs, and no em dash.
+
+## After, local
+
+Measured on `site-pass` at `1fb8d1e`, a local production build served with `next start -p 3010`. These numbers are indicative only. The gates above are judged on the production deploy after the release Go, same method as 2026-09-22. This section exists to catch regressions early, not to close the gates.
+
+Method: Lighthouse 12.8.2, mobile form factor, simulated throttling, headless Chrome (Playwright's Chromium build, no system Chrome installed on this machine). One run per route, no median of multiple runs, so perf numbers move a point or two on a rerun. Accessibility, best practices, SEO and CLS are stable and are the numbers the gate cares about. Playwright drove the same four routes at 1440 and 390 wide, viewport set before navigation, comparing `document.documentElement.scrollWidth` to `clientWidth` for horizontal scroll, and capturing browser console output. On `/try` nothing was pressed, the page was measured at rest.
+
+| Route | Perf | A11y | Best practices | SEO | CLS | Weight | Weight gate |
+|---|---|---|---|---|---|---|---|
+| `/try` | 98 | 100 | 100 | 100 | 0 | 321 KiB | ≤ 300 KiB, **miss** |
+| `/audit` | 96 | 100 | 100 | 100 | 0 | 306 KiB | ≤ 310 KiB, pass |
+| `/log` | 97 | 100 | 100 | 100 | 0 | 310 KiB | ≤ 300 KiB, **miss** |
+| `/log/green-for-21-days` | 97 | 100 | 100 | 100 | 0 | 298 KiB | no route-specific gate, would pass at the `/log` cap |
+
+Accessibility, best practices and SEO hit 100 on all four routes, including `/try`, which was 96 on best practices before this branch. The gate for those three categories is met locally. CLS is 0 everywhere, that gate is met too.
+
+Two weight gates miss. `/try` comes in at 321 KiB against a 300 KiB cap, `/log` at 310 KiB against the same cap. The `total-byte-weight` audit shows the same shared cost on every inner route: two JS chunks the app ships on every page, `34wvn5zw0a69w.js` at 64 KiB and `04l2v6p7fakl9.js` at 34 KiB, plus four font files that load together, `GeistMono_Variable` at 34 KiB, `Geist_Variable` at 33 KiB, and the two Instrument Serif italic and regular cuts at 22 and 21 KiB. That is roughly 208 KiB of shared chunks and fonts before a route's own markup is counted, which is why `/try` and `/log`, the two lightest pages, are the ones that cross the line while `/audit`, which ships more of its own script for the in-browser engine, stays under its higher 310 KiB allowance. The `legacy-javascript` and `unused-javascript` audits score 0.5 on `/try`, pointing at the same large chunk as a place with headroom, but that is a code change and out of scope here. Do not fix this from this section, the brief is measurement only.
+
+Console errors on load are 0 in the browser on both viewports on all four routes. This gate is met locally. On `/try`, the local Neon database is refusing writes and reads with an HTTP 402, quota exceeded, which is the same condition the D2 decisions were written for. The server terminal logs `try flags unavailable` with the underlying `NeonDbError` and its 402 quota message on every load of `/try`, but this is a server-side log from the local environment, not a browser console error and not page code. In the browser, `/try` shows "Watch is paused. The monitor is still running, its flags will show here when the dashboard is back." at both 1440 and 390, with no red error and no thrown exception. That is the D2 fallback working as designed against a genuinely refusing database.
+
+No horizontal scroll on any of the four routes at 1440 or 390. `scrollWidth` equals `clientWidth` in every case.
+
+The `/try` press-buttons gate, "the broker answers" when the database refuses, was not measured here. The brief for this task says press nothing on `/try` and measure the page at rest only, so the request-side behavior of the rate limiter and the execute handler under a refusing database is left to its own test coverage (`test/try-handlers.test.ts`) and to the production check after the release Go.
